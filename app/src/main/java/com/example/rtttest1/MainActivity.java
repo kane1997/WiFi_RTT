@@ -63,20 +63,6 @@ public class MainActivity extends AppCompatActivity {
     this.registerReceiver(myReceiver, filter);
     */
 
-    //Check RTT availability of the device
-    public void onClickCheckRTTAvailability(View view){
-        boolean RTT_availability = getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
-        Snackbar RTT_support;
-
-        if (RTT_availability) {
-            RTT_support = Snackbar.make(view, "RTT supported",
-                    BaseTransientBottomBar.LENGTH_LONG);
-        } else {
-            RTT_support = Snackbar.make(view, "RTT not supported",
-                    BaseTransientBottomBar.LENGTH_LONG);
-        }
-        RTT_support.show();
-    }
 
     public void onClickScanAPs(View view){
         //TODO
@@ -99,5 +85,22 @@ public class MainActivity extends AppCompatActivity {
     // start ranging and return results on main thread
     //RttManager.startRanging(request,callback,null);
     */
+
+
+
+    //Check RTT availability of the device
+    public void onClickCheckRTTAvailability(View view){
+        boolean RTT_availability = getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
+        Snackbar RTT_support;
+
+        if (RTT_availability) {
+            RTT_support = Snackbar.make(view, "RTT supported",
+                    BaseTransientBottomBar.LENGTH_LONG);
+        } else {
+            RTT_support = Snackbar.make(view, "RTT not supported",
+                    BaseTransientBottomBar.LENGTH_LONG);
+        }
+        RTT_support.show();
+    }
 
 }
