@@ -1,51 +1,67 @@
 package com.example.rtttest1;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.Manifest;
+import android.Manifest.permission;
 import android.content.Intent;
-import android.net.wifi.rtt.RangingResult;
-import android.net.wifi.rtt.RangingResultCallback;
-import android.net.wifi.rtt.WifiRttManager;
 import android.os.Bundle;
-
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import android.content.pm.PackageManager;
-import android.content.IntentFilter;
-
-import android.net.wifi.rtt.WifiRttManager;
-import android.net.wifi.rtt.RangingRequest;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private WifiRttManager RttManager;
+    private static final String TAG = "MainActivity";
+
+    private boolean LocationPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //get instance of WifiRTTManager
-        RttManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
     }
 
-    /*
-    // in onResume state check location permission
     @Override
-    public void onResume(){
+    protected void onResume() {
+        Log.d(TAG, "onResume()");
+        super.onResume();
 
+        // each time resume back in onResume state check location permission
+        LocationPermission = ActivityCompat.checkSelfPermission(this,
+                permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        Log.d(TAG, String.valueOf(LocationPermission));
     }
-    */
+
+    @Override
+    protected void onPause() {
+        Log.d(TAG, "onPause()");
+        super.onPause();
+        //TODO save battery and memory
+    }
+
+    public void onClickScanAPs(View view){
+        Log.d(TAG, "onClickScanAPs");
+
+        Snackbar Scan_msg;
+        if (LocationPermission) {
+            //TODO scan
+            Log.d(TAG,"Scanning");
+
+            Scan_msg = Snackbar.make(view, "Scanning",
+                    BaseTransientBottomBar.LENGTH_LONG);
+            Scan_msg.show();
+
+        } else {
+            Intent IntentRequestPermission = new Intent(this,
+                    LocationPermissionRequest.class);
+            startActivity(IntentRequestPermission);
+        }
+    }
 
     /*
     // receive WiFi RTT status change
@@ -63,10 +79,6 @@ public class MainActivity extends AppCompatActivity {
     this.registerReceiver(myReceiver, filter);
     */
 
-
-    public void onClickScanAPs(View view){
-        //TODO
-    }
     /*
     //https://www.py4u.net/discuss/676888
     final RangingRequest rttRequest = new RangingRequest.Builder().
@@ -86,18 +98,18 @@ public class MainActivity extends AppCompatActivity {
     //RttManager.startRanging(request,callback,null);
     */
 
-
-
     //Check RTT availability of the device
     public void onClickCheckRTTAvailability(View view){
+        Log.d(TAG,"Checking RTT Availability");
+
         boolean RTT_availability = getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
         Snackbar RTT_support;
 
         if (RTT_availability) {
-            RTT_support = Snackbar.make(view, "RTT supported",
+            RTT_support = Snackbar.make(view, "RTT supported on this device :)",
                     BaseTransientBottomBar.LENGTH_LONG);
         } else {
-            RTT_support = Snackbar.make(view, "RTT not supported",
+            RTT_support = Snackbar.make(view, "RTT not supported on this device :(",
                     BaseTransientBottomBar.LENGTH_LONG);
         }
         RTT_support.show();
