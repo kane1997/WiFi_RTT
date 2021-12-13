@@ -9,26 +9,34 @@
 
     <Button
         android:id="@+id/btn1CheckRTT"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="32dp"
         android:onClick="onClickCheckRTTAvailability"
         android:text="@string/CheckRTTAvailability"
-        app:layout_constraintBottom_toTopOf="@+id/btn2ScanAPs"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btn2ScanAPs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="32dp"
         android:onClick="onClickScanAPs"
         android:text="@string/ScanAPS"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toEndOf="@+id/btn1CheckRTT" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/ScanResultHint"
+        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.658" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
