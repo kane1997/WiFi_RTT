@@ -3,8 +3,10 @@
 
     <!-- activity_main -->
     <string name="ScanAPS">Scan</string>
+    <string name="ActivityMainLabel">WiFiRTT</string>
     <string name="CheckRTTAvailability">Check RTT Availability</string>
     <string name="ScanResultHint">Scan result will be displayed here.</string>
+    <string name="Ranging">Ranging</string>
 
     <!-- permission_request -->
     <string name="GrantLocationPermission">Continue</string>
@@ -12,4 +14,7 @@
     <string name="PermissionRequestLabel">Location Permission Request</string>
     <string name="LocationRequestDescription">This app needs access to your phone\'s
     location to show the distance between this device and the APs.</string>
+
+    <!-- activity_ranging -->
+    <string name="ActivityRangingLabel">Ranging Results</string>
 </resources>

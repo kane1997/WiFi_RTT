@@ -9,34 +9,46 @@
 
     <Button
         android:id="@+id/btn1CheckRTT"
-        android:layout_width="140dp"
-        android:layout_height="55dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginBottom="56dp"
         android:onClick="onClickCheckRTTAvailability"
         android:text="@string/CheckRTTAvailability"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btn2ScanAPs"
-        android:layout_width="140dp"
-        android:layout_height="55dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="110dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="16dp"
         android:onClick="onClickScanAPs"
         android:text="@string/ScanAPS"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn1CheckRTT" />
+        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        app:layout_constraintEnd_toStartOf="@+id/btn3Ranging"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/ScanResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/ScanResultHint"
-        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/btn2ScanAPs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn3Ranging"
+        android:layout_width="110dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="68dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/Ranging"
+        android:onClick="onClickRangingAPs"
+        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
