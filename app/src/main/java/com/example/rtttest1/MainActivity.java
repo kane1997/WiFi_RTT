@@ -8,13 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.rtt.RangingRequest;
-import android.net.wifi.rtt.RangingResult;
-import android.net.wifi.rtt.RangingResultCallback;
 import android.net.wifi.rtt.WifiRttManager;
 import android.os.Bundle;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
@@ -36,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean LocationPermission = false;
 
-    List<ScanResult> APsSupportingRTT;
+    ArrayList<ScanResult> RTT_APs;
 
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
     private WifiRttManager myWifiRTTManager;
-    private TextView AP;
+
+    private TextView ScanResultDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +49,19 @@ public class MainActivity extends AppCompatActivity {
         myWifiReceiver = new WifiScanReceiver();
         myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
 
-        APsSupportingRTT = new ArrayList<>();
-
-        AP = findViewById(R.id.textView1);
+        ScanResultDisplay = findViewById(R.id.ScanResult);
     }
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume()");
+        Log.d(TAG, "onResume MainActivity");
         super.onResume();
 
         // each time resume back in onResume state, check location permission
         LocationPermission = ActivityCompat.checkSelfPermission(
                 this, permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-        Log.d(TAG, String.valueOf(LocationPermission));
+        Log.d(TAG, "Location permission:" + LocationPermission);
 
         //register a Broadcast receiver to run in the main activity thread
         registerReceiver(
@@ -74,30 +69,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        Log.d(TAG, "onPause()");
-        super.onPause();
+    protected void onStop() {
+        Log.d(TAG, "onStop MainActivity");
+        super.onStop();
         unregisterReceiver(myWifiReceiver);
     }
 
-
     //Scan surrounding WiFi points
     public void onClickScanAPs(View view) {
-        Log.d(TAG, "onClickScanAPs");
+        Log.d(TAG,"onClickScanAPs()");
 
         if (LocationPermission) {
+            Log.d(TAG, "Scanning...");
             myWifiManager.startScan();
 
-            Log.d(TAG, "Scanning");
-            Snackbar.make(view, "Scanning...", BaseTransientBottomBar.LENGTH_LONG).show();
+            Snackbar.make(view, "Scanning...", Snackbar.LENGTH_LONG).show();
 
         } else {
+            // request permission
             Intent IntentRequestPermission = new Intent(this,
                     LocationPermissionRequest.class);
             startActivity(IntentRequestPermission);
         }
     }
 
+    //Start ranging in a new screen
+    public void onClickRangingAPs(View view) {
+        Log.d(TAG,"onClickRangingAPs()");
+
+        Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
+        //Pass RTT_APs to next activity
+        IntentRanging.putParcelableArrayListExtra("SCAN_RESULT",RTT_APs);
+        startActivity(IntentRanging);
+    }
 
     private class WifiScanReceiver extends BroadcastReceiver {
 
@@ -116,53 +120,23 @@ public class MainActivity extends AppCompatActivity {
         //Add to avoid permission check for each scan
         @SuppressLint("MissingPermission")
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive()");
+            Log.d(TAG, "onReceive MainActivity");
+
             List<ScanResult> scanResults = myWifiManager.getScanResults();
-            APsSupportingRTT = findRTTAPs(scanResults);
-            AP.setText(String.valueOf(APsSupportingRTT));
+            RTT_APs = (ArrayList<ScanResult>) findRTTAPs(scanResults);
+            Log.d(TAG, "All WiFi points\n" + scanResults);
+            Log.d(TAG, "RTT APs\n" + RTT_APs);
 
-            RangingRequest.Builder builder = new RangingRequest.Builder();
-            builder.addAccessPoints(APsSupportingRTT);
-            Log.d(TAG, String.valueOf(APsSupportingRTT));
-            final RangingRequest request = new RangingRequest.Builder()
-                    .addAccessPoints(APsSupportingRTT).build();
+            if (!RTT_APs.isEmpty()){
+                //TODO better display
+                ScanResultDisplay.setText(String.valueOf(RTT_APs));
 
-            final RangingResultCallback callback = new RangingResultCallback() {
-                @Override
-                public void onRangingFailure(int i) {
-                    Log.d(TAG, "Ranging failed");
-                }
-
-                @Override
-                public void onRangingResults(@NonNull List<RangingResult> list) {
-                    Log.d(TAG, String.valueOf(list));
-                }
-            };
-            myWifiRTTManager.startRanging(request,getApplication().getMainExecutor(),callback);
-        }
-
-                /*
-            for (ScanResult scanResult : APsSupportingRTT) {
-                RangingRequest.Builder builder = new RangingRequest.Builder();
-                builder.addAccessPoint(scanResult);
-                Log.d(TAG, String.valueOf(scanResult));
-                final RangingRequest request = new RangingRequest.Builder()
-                        .addAccessPoint(scanResult).build();
-                final RangingResultCallback callback = new RangingResultCallback() {
-                    @Override
-                    public void onRangingFailure(int i) {
-                        Log.d(TAG, "Ranging failed");
-                    }
-
-                    @Override
-                    public void onRangingResults(@NonNull List<RangingResult> list) {
-                        Log.d(TAG, String.valueOf(list));
-                    }
-                };
-                myWifiRTTManager.startRanging(request, (Executor) callback, null);
+            } else{
+                String NO_AP = "No RTT APs available";
+                ScanResultDisplay.setText(NO_AP);
+                Log.d(TAG,NO_AP);
             }
-
-                 */
+        }
     }
 
     //Check RTT availability of the device
@@ -172,10 +146,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (RTT_availability) {
             Snackbar.make(view, "RTT supported on this device :)",
-                    BaseTransientBottomBar.LENGTH_LONG).show();
+                    Snackbar.LENGTH_LONG).show();
         } else {
             Snackbar.make(view, "RTT not supported on this device :(",
-                    BaseTransientBottomBar.LENGTH_LONG).show();
+                    Snackbar.LENGTH_LONG).show();
         }
     }
+
 }

@@ -1,6 +1,5 @@
 package com.example.rtttest1;
 
-import android.Manifest;
 import android.Manifest.permission;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -10,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+
+import java.util.Arrays;
 
 public class LocationPermissionRequest extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -57,7 +58,7 @@ public class LocationPermissionRequest extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permission, grantResult);
 
         String PermissionResult = "Request code: " + requestCode + ", permission: "
-                + permission + ", result: " + grantResult;
+                + Arrays.toString(permission) + ", result: " + Arrays.toString(grantResult);
 
         Log.d(TAG, "onRequestPermissionResult()" + PermissionResult);
 

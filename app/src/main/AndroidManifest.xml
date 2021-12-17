@@ -25,8 +25,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.RTTtest1.NoActionBar">
+            android:label="@string/ActivityMainLabel"
+            android:theme="@style/Theme.RTTtest1">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,6 +37,11 @@
         <activity
             android:name=".LocationPermissionRequest"
             android:label="@string/PermissionRequestLabel"
+            android:parentActivityName=".MainActivity">
+        </activity>
+
+        <activity android:name=".RangingActivity"
+            android:label="@string/ActivityRangingLabel"
             android:parentActivityName=".MainActivity">
         </activity>
 
