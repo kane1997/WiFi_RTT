@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RTTtest1</string>
+    <string name="app_name">WiFi-RTT</string>
 
     <!-- activity_main -->
     <string name="ScanAPS">Scan</string>
@@ -17,4 +17,7 @@
 
     <!-- activity_ranging -->
     <string name="ActivityRangingLabel">Ranging Results</string>
+    <string name="DelayBeforeNextRequest">Ranging Delay (ms)</string>
+    <string name="DelayHint">1000</string>
+    <string name="LogButton">Log</string>
 </resources>

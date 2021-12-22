@@ -8,7 +8,7 @@
     tools:context=".LocationPermissionRequest">
 
     <Button
-        android:id="@+id/btn3GrantPermission"
+        android:id="@+id/btnGrantPermission"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="48dp"
@@ -19,14 +19,14 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/btn4DenyPermission"
+        android:id="@+id/btnDenyPermission"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="28dp"
         android:text="@string/DenyLocationPermission"
         android:onClick="onClickPermissionDenied"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn3GrantPermission"
+        app:layout_constraintEnd_toStartOf="@+id/btnGrantPermission"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -37,7 +37,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:text="@string/LocationRequestDescription"
-        app:layout_constraintBottom_toTopOf="@+id/btn4DenyPermission"
+        app:layout_constraintBottom_toTopOf="@+id/btnDenyPermission"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

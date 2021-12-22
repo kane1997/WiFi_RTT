@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.rtt.WifiRttManager;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -36,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
-    private WifiRttManager myWifiRTTManager;
 
     private TextView ScanResultDisplay;
 
@@ -47,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
         myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         myWifiReceiver = new WifiScanReceiver();
-        myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
 
         ScanResultDisplay = findViewById(R.id.ScanResult);
     }
