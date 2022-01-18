@@ -1,3 +1,8 @@
 <resources>
+    <dimen name="recycler_item_text_size">20sp</dimen>
+
+
+
+
     <dimen name="fab_margin">16dp</dimen>
 </resources>

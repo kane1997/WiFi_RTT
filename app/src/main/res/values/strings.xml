@@ -17,7 +17,7 @@
 
     <!-- activity_ranging -->
     <string name="ActivityRangingLabel">Ranging Results</string>
-    <string name="DelayBeforeNextRequest">Ranging Delay (ms)</string>
+    <string name="DelayBeforeNextRequest">RTT Ranging Delay (ms)</string>
     <string name="DelayHint">1000</string>
-    <string name="LogButton">Log</string>
+    <string name="LogButton">Log RTT</string>
 </resources>

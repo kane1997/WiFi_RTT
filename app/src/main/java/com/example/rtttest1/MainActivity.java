@@ -15,6 +15,9 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.LayoutManager;
 
 import android.util.Log;
 import android.view.View;
@@ -25,33 +28,54 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Check RTT availability, scan surrounding APs and display
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private boolean LocationPermission = false;
 
-    ArrayList<ScanResult> RTT_APs;
+    ArrayList<ScanResult> AP_list_support_RTT;
 
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
 
-    private TextView ScanResultDisplay;
+    //private TextView Scan_result_textview;
+    private RecyclerView myRecyclerView;
+
+    private MyAdapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        myRecyclerView = findViewById(R.id.RecyclerViewAPs);
+
+        // Improve performance if you know that changes in content do not change the layput size
+        // of the RecyclerView
+        // TODO figure out why
+        myRecyclerView.setHasFixedSize(true);
+
+        LayoutManager layoutManager = new LinearLayoutManager(this);
+        myRecyclerView.setLayoutManager((layoutManager));
+
+        AP_list_support_RTT = new ArrayList<>();
+
+        myAdapter = new MyAdapter(AP_list_support_RTT);
+        myRecyclerView.setAdapter(myAdapter);
+
         myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         myWifiReceiver = new WifiScanReceiver();
 
-        ScanResultDisplay = findViewById(R.id.ScanResult);
+        //Scan_result_textview = findViewById(R.id.ScanResult);
     }
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume MainActivity");
+        Log.d(TAG, "onResume() MainActivity");
         super.onResume();
 
         // each time resume back in onResume state, check location permission
@@ -67,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop MainActivity");
+        Log.d(TAG, "onStop() MainActivity");
         super.onStop();
         unregisterReceiver(myWifiReceiver);
     }
@@ -95,13 +119,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG,"onClickRangingAPs()");
 
         Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
-        //Pass RTT_APs to next activity
-        IntentRanging.putParcelableArrayListExtra("SCAN_RESULT",RTT_APs);
+        //Pass AP_list_support_RTT to next activity
+        IntentRanging.putParcelableArrayListExtra("SCAN_RESULT", AP_list_support_RTT);
         startActivity(IntentRanging);
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
-
         //Only keep RTT supported APs from the original scan list
         private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
             List<ScanResult> RTT_APs = new ArrayList<>();
@@ -117,21 +140,25 @@ public class MainActivity extends AppCompatActivity {
         //Add to avoid permission check for each scan
         @SuppressLint("MissingPermission")
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive MainActivity");
+            Log.d(TAG, "onReceive() MainActivity");
 
             List<ScanResult> scanResults = myWifiManager.getScanResults();
-            RTT_APs = (ArrayList<ScanResult>) findRTTAPs(scanResults);
+            AP_list_support_RTT = (ArrayList<ScanResult>) findRTTAPs(scanResults);
             Log.d(TAG, "All WiFi points\n" + scanResults);
-            Log.d(TAG, "RTT APs\n" + RTT_APs);
+            Log.d(TAG, "RTT APs\n" + AP_list_support_RTT);
 
-            if (!RTT_APs.isEmpty()){
+            if (!AP_list_support_RTT.isEmpty()){
+                myAdapter.swapData(AP_list_support_RTT);
                 //TODO better display
-                ScanResultDisplay.setText(String.valueOf(RTT_APs));
+                //Scan_result_textview.setText(String.valueOf(AP_list_support_RTT));
 
             } else{
-                String NO_AP = "No RTT APs available";
-                ScanResultDisplay.setText(NO_AP);
-                Log.d(TAG,NO_AP);
+                Log.d(TAG,"No RTT APs available");
+                /*
+                String NO_RTT_APs = "No RTT APs available";
+                Scan_result_textview.setText(NO_RTT_APs);
+                Log.d(TAG,NO_RTT_APs);
+                 */
             }
         }
     }
@@ -139,7 +166,9 @@ public class MainActivity extends AppCompatActivity {
     //Check RTT availability of the device
     public void onClickCheckRTTAvailability(View view){
         Log.d(TAG,"Checking RTT Availability");
-        boolean RTT_availability = getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
+
+        boolean RTT_availability = getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
 
         if (RTT_availability) {
             Snackbar.make(view, "RTT supported on this device :)",
@@ -149,5 +178,4 @@ public class MainActivity extends AppCompatActivity {
                     Snackbar.LENGTH_LONG).show();
         }
     }
-
 }

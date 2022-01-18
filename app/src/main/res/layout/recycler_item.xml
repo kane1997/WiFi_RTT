@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    >
+
+
+    <TextView
+        android:id="@+id/SSID_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_weight="1"
+        android:textSize="@dimen/recycler_item_text_size">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/BSSID_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_weight="1"
+        android:textSize="@dimen/recycler_item_text_size">
+    </TextView>
+
+</LinearLayout>
+
+    <!--
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/SSIDtextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="SSID"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/BSSIDtextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BSSID"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="13dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+    -->

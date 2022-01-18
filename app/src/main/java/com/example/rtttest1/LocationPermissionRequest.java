@@ -12,6 +12,9 @@ import android.view.View;
 
 import java.util.Arrays;
 
+/**
+ * Request for location permission
+ */
 public class LocationPermissionRequest extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
 

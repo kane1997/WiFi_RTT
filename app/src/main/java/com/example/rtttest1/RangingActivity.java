@@ -34,7 +34,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * A ranging request returns the average distance of 7 readings from a burst
+ * Send ranging requests and display distance and RSSI values
  */
 public class RangingActivity extends AppCompatActivity {
     private static final String TAG = "RangingActivity";
@@ -105,13 +105,6 @@ public class RangingActivity extends AppCompatActivity {
             myRTTResultCallback = new RTTRangingResultCallback();
 
             startRangingRequest();
-
-            //For IMU
-            /*
-            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-            Sensor sensorA = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-             */
-
         }
     }
 
@@ -140,19 +133,33 @@ public class RangingActivity extends AppCompatActivity {
 
     public void onClickLogRTT(View view){
         Log.d(TAG,"onClickLogRTT()");
-        if (Running){
-            Handler LogHandler = new Handler();
-            Runnable Logrunnable = new Runnable() {
-                @Override
-                public void run() {
-                    LogHandler.postDelayed(this,1000);
+
+        Handler LogHandler = new Handler();
+        Runnable Logrunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!Running) {
+                    Log.d(TAG,"Remove");
+                    LogHandler.removeCallbacks(this);
+                }else{
+                    Log.d(TAG,"Running");
+                    // rate of packet sending
+                    LogHandler.postDelayed(this,100);
 
                     //IP address of Nest Router
                     String url = "http://192.168.86.24:5000/server";
 
+                    //IP address of personal hotspot (not working)
+                    //String url = "http://172.20.10.2:5000/server";
+
+                    //IP address of Yilun's laptop
+                    //String url = "http://192.168.137.179:5000/server";
+
                     OkHttpClient client = new OkHttpClient.Builder().build();
 
                     RequestBody body = new FormBody.Builder()
+                            .add("Timestamp", (String) ((TextView)
+                                    findViewById(R.id.timestamp)).getText())
                             .add("Mac_1", (String) ((TextView)
                                     findViewById(R.id.Mac_1)).getText())
                             .add("Distance_1", (String) ((TextView)
@@ -190,14 +197,13 @@ public class RangingActivity extends AppCompatActivity {
                         public void onResponse(Call call, Response response) throws IOException {
                             String result = response.body().string();
                             Log.i("result", result);
-
                         }
                     });
                 }
-            };
-            LogHandler.postDelayed(Logrunnable,100);
-        }
-
+            }
+        };
+        // wait x ms (only once) before running
+        LogHandler.postDelayed(Logrunnable,1000);
     }
 
     private class RTTRangingResultCallback extends RangingResultCallback {
@@ -210,7 +216,7 @@ public class RangingActivity extends AppCompatActivity {
 
         @Override
         public void onRangingFailure(int i) {
-            Log.d(TAG,"Ranging failed");
+            Log.d(TAG,"Ranging failed！！！！！！！！！！！！！！");
             queueNextRangingRequest();
         }
 
@@ -219,13 +225,17 @@ public class RangingActivity extends AppCompatActivity {
             Log.d(TAG,"Ranging successful");
             Log.d(TAG, list.toString());
 
-            if (Running){
+            Integer status
+                    = list.get(0).getStatus() + list.get(1).getStatus() + list.get(2).getStatus();
+            if (Running && status == 0){
+                Log.d(TAG, String.valueOf(Running && status == 0));
                 TextView distance_Text1 = findViewById(R.id.Distance_1);
                 TextView distance_Text2 = findViewById(R.id.Distance_2);
                 TextView distance_Text3 = findViewById(R.id.Distance_3);
                 TextView RSSI_Text1 = findViewById(R.id.RSSI_1);
                 TextView RSSI_Text2 = findViewById(R.id.RSSI_2);
                 TextView RSSI_Text3 = findViewById(R.id.RSSI_3);
+                TextView timestamp_Text = findViewById(R.id.timestamp);
 
                 distance_Text1.setText(String.valueOf(list.get(0).getDistanceMm()));
                 distance_Text2.setText(String.valueOf(list.get(1).getDistanceMm()));
@@ -233,9 +243,12 @@ public class RangingActivity extends AppCompatActivity {
                 RSSI_Text1.setText(String.valueOf(list.get(0).getRssi()));
                 RSSI_Text2.setText(String.valueOf(list.get(1).getRssi()));
                 RSSI_Text3.setText(String.valueOf(list.get(2).getRssi()));
+                timestamp_Text.setText(String.valueOf(list.get(0).getRangingTimestampMillis()));
 
-                queueNextRangingRequest();
                 //TODO recycler view on results
+            }
+            if (Running){
+                queueNextRangingRequest();
             }
         }
     }
