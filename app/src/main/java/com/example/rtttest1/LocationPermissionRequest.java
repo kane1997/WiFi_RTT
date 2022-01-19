@@ -18,7 +18,6 @@ import java.util.Arrays;
 public class LocationPermissionRequest extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    //Debug logs in logcat
     private static final String TAG = "LocationPermissionRequest";
 
     // ID to identify location permission request

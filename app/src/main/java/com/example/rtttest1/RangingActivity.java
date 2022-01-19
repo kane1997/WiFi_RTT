@@ -21,6 +21,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,13 +74,11 @@ public class RangingActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     "Please scan for available APs first",
                     Toast.LENGTH_SHORT).show();
-
             finish();
         } else {
             setContentView(R.layout.activity_ranging);
             Log.d(TAG, "RTT_APs passed to RangingActivity.java \n" + RTT_APs);
 
-            //RangingResultList = findViewById(R.id.RangingResultList);
             TextView mac_Text1 = findViewById(R.id.Mac_1);
             TextView mac_Text2 = findViewById(R.id.Mac_2);
             TextView mac_Text3 = findViewById(R.id.Mac_3);
@@ -139,10 +139,8 @@ public class RangingActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (!Running) {
-                    Log.d(TAG,"Remove");
                     LogHandler.removeCallbacks(this);
                 }else{
-                    Log.d(TAG,"Running");
                     // rate of packet sending
                     LogHandler.postDelayed(this,100);
 
@@ -216,7 +214,7 @@ public class RangingActivity extends AppCompatActivity {
 
         @Override
         public void onRangingFailure(int i) {
-            Log.d(TAG,"Ranging failed！！！！！！！！！！！！！！");
+            Log.d(TAG,"Ranging failed！");
             queueNextRangingRequest();
         }
 
@@ -228,7 +226,7 @@ public class RangingActivity extends AppCompatActivity {
             Integer status
                     = list.get(0).getStatus() + list.get(1).getStatus() + list.get(2).getStatus();
             if (Running && status == 0){
-                Log.d(TAG, String.valueOf(Running && status == 0));
+                //Log.d(TAG, String.valueOf(Running && status == 0));
                 TextView distance_Text1 = findViewById(R.id.Distance_1);
                 TextView distance_Text2 = findViewById(R.id.Distance_2);
                 TextView distance_Text3 = findViewById(R.id.Distance_3);

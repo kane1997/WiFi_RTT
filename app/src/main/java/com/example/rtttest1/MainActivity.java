@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
 
-    //private TextView Scan_result_textview;
     private RecyclerView myRecyclerView;
 
     private MyAdapter myAdapter;
@@ -119,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG,"onClickRangingAPs()");
 
         Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
+
         //Pass AP_list_support_RTT to next activity
         IntentRanging.putParcelableArrayListExtra("SCAN_RESULT", AP_list_support_RTT);
         startActivity(IntentRanging);
@@ -144,21 +144,14 @@ public class MainActivity extends AppCompatActivity {
 
             List<ScanResult> scanResults = myWifiManager.getScanResults();
             AP_list_support_RTT = (ArrayList<ScanResult>) findRTTAPs(scanResults);
-            Log.d(TAG, "All WiFi points\n" + scanResults);
-            Log.d(TAG, "RTT APs\n" + AP_list_support_RTT);
+            Log.d(TAG, "All WiFi points: " + scanResults);
+            Log.d(TAG, "RTT APs: " + AP_list_support_RTT);
 
             if (!AP_list_support_RTT.isEmpty()){
                 myAdapter.swapData(AP_list_support_RTT);
-                //TODO better display
-                //Scan_result_textview.setText(String.valueOf(AP_list_support_RTT));
 
             } else{
                 Log.d(TAG,"No RTT APs available");
-                /*
-                String NO_RTT_APs = "No RTT APs available";
-                Scan_result_textview.setText(NO_RTT_APs);
-                Log.d(TAG,NO_RTT_APs);
-                 */
             }
         }
     }

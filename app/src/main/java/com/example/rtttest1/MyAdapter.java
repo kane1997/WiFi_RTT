@@ -56,7 +56,7 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        Log.d(TAG, "onBindViewHolder()");
+        //Log.d(TAG, "onBindViewHolder()");
         ViewHolderItems viewHolderItems = (ViewHolderItems) viewHolder;
         ScanResult currentScanResult = AP_list_support_RTT.get(position);
 

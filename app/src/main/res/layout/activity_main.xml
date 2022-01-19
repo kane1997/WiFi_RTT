@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,7 +10,7 @@
         android:id="@+id/btn1CheckRTT"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="48dp"
         android:onClick="onClickCheckRTTAvailability"
         android:text="@string/CheckRTTAvailability"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,18 +48,40 @@
         android:layout_height="50dp"
         android:layout_marginEnd="68dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/Ranging"
         android:onClick="onClickRangingAPs"
+        android:text="@string/Ranging"
         app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RecyclerViewAPs"
-        android:layout_width="409dp"
-        android:layout_height="268dp"
-        app:layout_constraintBottom_toTopOf="@+id/btn2ScanAPs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewSSID" />
+
+    <TextView
+        android:id="@+id/textViewSSID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/SSIDHeader"
+        android:textSize="34sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewBSSID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="50dp"
+        android:text="@string/BSSIDHeader"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
