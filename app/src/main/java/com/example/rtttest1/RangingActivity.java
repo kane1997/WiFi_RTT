@@ -3,8 +3,6 @@ package com.example.rtttest1;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
@@ -15,17 +13,19 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,18 +48,16 @@ public class RangingActivity extends AppCompatActivity {
     //flag for leaving the activity
     Boolean Running = true;
 
+    List<RangingResult> list = new ArrayList<>();
+
     private EditText RangingDelayEditText;
 
+    private RangingActivityAdapter rangingActivityAdapter;
+
     private int RangingDelay;
-    private int i = 0;
+    private int status = 0;
 
     final Handler RangingRequestDelayHandler = new Handler();
-
-    //For IMU
-    /*
-    private SensorManager sensorManager;
-    private float AccX,AccY,AccZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ;
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,27 +77,18 @@ public class RangingActivity extends AppCompatActivity {
             setContentView(R.layout.activity_ranging);
             Log.d(TAG, "RTT_APs passed to RangingActivity.java \n" + RTT_APs);
 
-            TextView mac_Text1 = findViewById(R.id.Mac_1);
-            TextView mac_Text2 = findViewById(R.id.Mac_2);
-            TextView mac_Text3 = findViewById(R.id.Mac_3);
+            RecyclerView myRecyclerView = findViewById(R.id.recyclerViewResults);
+            myRecyclerView.setHasFixedSize(true);
 
-            for (ScanResult s:RTT_APs){
-                switch(i){
-                    case 0:
-                        mac_Text1.setText(s.BSSID);
-                        break;
-                    case 1:
-                        mac_Text2.setText(s.BSSID);
-                        break;
-                    case 2:
-                        mac_Text3.setText(s.BSSID);
-                        break;
-                }
-                i++;
-            }
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            myRecyclerView.setLayoutManager((layoutManager));
+
+            rangingActivityAdapter = new RangingActivityAdapter(list);
+            myRecyclerView.setAdapter(rangingActivityAdapter);
 
             RangingDelayEditText = findViewById(R.id.delayValue);
-            RangingDelayEditText.setText(String.format("%d", RangingDelayDefault));
+            RangingDelayEditText.setText(String.format(
+                    Locale.getDefault(),"%d", RangingDelayDefault));
 
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
             myRTTResultCallback = new RTTRangingResultCallback();
@@ -121,7 +110,13 @@ public class RangingActivity extends AppCompatActivity {
         myWifiRTTManager.startRanging(
                 rangingRequest,getApplication().getMainExecutor(),myRTTResultCallback);
 
-        RangingDelay = Integer.parseInt(RangingDelayEditText.getText().toString());
+        String delay = RangingDelayEditText.getText().toString();
+        if (!delay.equals("")){
+            RangingDelay = Integer.parseInt(RangingDelayEditText.getText().toString());
+        }else{
+            Snackbar.make(findViewById(R.id.textViewDelayBeforeNextRequest),
+                    "Please enter a valid number",Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -134,15 +129,15 @@ public class RangingActivity extends AppCompatActivity {
     public void onClickLogRTT(View view){
         Log.d(TAG,"onClickLogRTT()");
 
-        Handler LogHandler = new Handler();
-        Runnable Logrunnable = new Runnable() {
+        Handler LogData_Handler = new Handler();
+        Runnable LogData_Runnable = new Runnable() {
             @Override
             public void run() {
-                if (!Running) {
-                    LogHandler.removeCallbacks(this);
-                }else{
-                    // rate of packet sending
-                    LogHandler.postDelayed(this,100);
+                if (!Running){
+                    LogData_Handler.removeCallbacks(this);
+                } else{
+                    //rate of packet sending
+                    LogData_Handler.postDelayed(this,300);
 
                     //IP address of Nest Router
                     String url = "http://192.168.86.24:5000/server";
@@ -156,27 +151,7 @@ public class RangingActivity extends AppCompatActivity {
                     OkHttpClient client = new OkHttpClient.Builder().build();
 
                     RequestBody body = new FormBody.Builder()
-                            .add("Timestamp", (String) ((TextView)
-                                    findViewById(R.id.timestamp)).getText())
-                            .add("Mac_1", (String) ((TextView)
-                                    findViewById(R.id.Mac_1)).getText())
-                            .add("Distance_1", (String) ((TextView)
-                                    findViewById(R.id.Distance_1)).getText())
-                            .add("RSSI_1", (String) ((TextView)
-                                    findViewById(R.id.RSSI_1)).getText())
-                            .add("Mac_2", (String) ((TextView)
-                                    findViewById(R.id.Mac_2)).getText())
-                            .add("Distance_2", (String) ((TextView)
-                                    findViewById(R.id.Distance_2)).getText())
-                            .add("RSSI_2", (String) ((TextView)
-                                    findViewById(R.id.RSSI_2)).getText())
-                            .add("Mac_3", (String) ((TextView)
-                                    findViewById(R.id.Mac_3)).getText())
-                            .add("Distance_3", (String) ((TextView)
-                                    findViewById(R.id.Distance_3)).getText())
-                            .add("RSSI_3", (String) ((TextView)
-                                    findViewById(R.id.RSSI_3)).getText())
-                            .build();
+                            .add("Result", String.valueOf(list)).build();
 
                     Request request = new Request.Builder()
                             .url(url)
@@ -187,21 +162,22 @@ public class RangingActivity extends AppCompatActivity {
 
                     call.enqueue(new Callback() {
                         @Override
-                        public void onFailure(Call call, IOException e) {
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
                             Log.i("onFailure",e.getMessage());
                         }
 
                         @Override
-                        public void onResponse(Call call, Response response) throws IOException {
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            assert response.body() != null;
                             String result = response.body().string();
-                            Log.i("result", result);
+                            Log.i("result",result);
                         }
                     });
                 }
             }
         };
-        // wait x ms (only once) before running
-        LogHandler.postDelayed(Logrunnable,1000);
+        //wait x ms (only once) before running
+        LogData_Handler.postDelayed(LogData_Runnable,1000);
     }
 
     private class RTTRangingResultCallback extends RangingResultCallback {
@@ -223,27 +199,14 @@ public class RangingActivity extends AppCompatActivity {
             Log.d(TAG,"Ranging successful");
             Log.d(TAG, list.toString());
 
-            Integer status
-                    = list.get(0).getStatus() + list.get(1).getStatus() + list.get(2).getStatus();
+            for (RangingResult r:list){
+                status += r.getStatus();
+            }
+
             if (Running && status == 0){
-                //Log.d(TAG, String.valueOf(Running && status == 0));
-                TextView distance_Text1 = findViewById(R.id.Distance_1);
-                TextView distance_Text2 = findViewById(R.id.Distance_2);
-                TextView distance_Text3 = findViewById(R.id.Distance_3);
-                TextView RSSI_Text1 = findViewById(R.id.RSSI_1);
-                TextView RSSI_Text2 = findViewById(R.id.RSSI_2);
-                TextView RSSI_Text3 = findViewById(R.id.RSSI_3);
-                TextView timestamp_Text = findViewById(R.id.timestamp);
-
-                distance_Text1.setText(String.valueOf(list.get(0).getDistanceMm()));
-                distance_Text2.setText(String.valueOf(list.get(1).getDistanceMm()));
-                distance_Text3.setText(String.valueOf(list.get(2).getDistanceMm()));
-                RSSI_Text1.setText(String.valueOf(list.get(0).getRssi()));
-                RSSI_Text2.setText(String.valueOf(list.get(1).getRssi()));
-                RSSI_Text3.setText(String.valueOf(list.get(2).getRssi()));
-                timestamp_Text.setText(String.valueOf(list.get(0).getRangingTimestampMillis()));
-
-                //TODO recycler view on results
+                if (!list.isEmpty()){
+                    rangingActivityAdapter.swapData(list);
+                }
             }
             if (Running){
                 queueNextRangingRequest();

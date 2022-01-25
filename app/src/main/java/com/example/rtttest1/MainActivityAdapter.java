@@ -1,7 +1,7 @@
 package com.example.rtttest1;
 
+import android.annotation.SuppressLint;
 import android.net.wifi.ScanResult;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,30 +12,29 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class MainActivityAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    private static final String TAG = "MyAdapter";
-    private ArrayList<ScanResult> AP_list_support_RTT;
+    private final ArrayList<ScanResult> AP_list_support_RTT;
 
     // A constructor
-    public MyAdapter(ArrayList<ScanResult> list){
+    public MainActivityAdapter(ArrayList<ScanResult> list){
         AP_list_support_RTT = list;
     }
 
-    public class ViewHolderItems extends ViewHolder{
+    public static class ViewHolderItems extends ViewHolder{
 
-        public TextView mySSIDTextView;
-        public TextView myBSSIDTextView;
+        public TextView mySSIDTextView_Main;
+        public TextView myBSSIDTextView_Main;
 
         public ViewHolderItems(View view){
             super(view);
-            mySSIDTextView = view.findViewById(R.id.SSID_textView);
-            myBSSIDTextView = view.findViewById(R.id.BSSID_textView);
+            mySSIDTextView_Main = view.findViewById(R.id.textViewSSID_Recycler);
+            myBSSIDTextView_Main = view.findViewById(R.id.textViewBSSID_Recycler);
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void swapData(ArrayList<ScanResult> list) {
         AP_list_support_RTT.clear();
 
@@ -48,8 +47,9 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewHolder viewHolder = new ViewHolderItems(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycler_item, parent, false));
+        ViewHolder viewHolder = new ViewHolderItems(
+                LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.main_activity_recycler_item, parent, false));
 
         return viewHolder;
     }
@@ -60,8 +60,8 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
         ViewHolderItems viewHolderItems = (ViewHolderItems) viewHolder;
         ScanResult currentScanResult = AP_list_support_RTT.get(position);
 
-        viewHolderItems.mySSIDTextView.setText(currentScanResult.SSID);
-        viewHolderItems.myBSSIDTextView.setText(currentScanResult.BSSID);
+        viewHolderItems.mySSIDTextView_Main.setText(currentScanResult.SSID);
+        viewHolderItems.myBSSIDTextView_Main.setText(currentScanResult.BSSID);
     }
 
     @Override

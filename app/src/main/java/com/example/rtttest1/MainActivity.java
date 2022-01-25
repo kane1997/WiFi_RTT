@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.View;
 
 import android.content.pm.PackageManager;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,21 +40,14 @@ public class MainActivity extends AppCompatActivity {
 
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
-
-    private RecyclerView myRecyclerView;
-
-    private MyAdapter myAdapter;
+    private MainActivityAdapter mainActivityAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        myRecyclerView = findViewById(R.id.RecyclerViewAPs);
-
-        // Improve performance if you know that changes in content do not change the layput size
-        // of the RecyclerView
-        // TODO figure out why
+        RecyclerView myRecyclerView = findViewById(R.id.RecyclerViewAPs);
         myRecyclerView.setHasFixedSize(true);
 
         LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -63,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
         AP_list_support_RTT = new ArrayList<>();
 
-        myAdapter = new MyAdapter(AP_list_support_RTT);
-        myRecyclerView.setAdapter(myAdapter);
+        mainActivityAdapter = new MainActivityAdapter(AP_list_support_RTT);
+        myRecyclerView.setAdapter(mainActivityAdapter);
 
         myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         myWifiReceiver = new WifiScanReceiver();
@@ -148,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "RTT APs: " + AP_list_support_RTT);
 
             if (!AP_list_support_RTT.isEmpty()){
-                myAdapter.swapData(AP_list_support_RTT);
+                mainActivityAdapter.swapData(AP_list_support_RTT);
 
             } else{
                 Log.d(TAG,"No RTT APs available");

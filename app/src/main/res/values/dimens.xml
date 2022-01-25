@@ -1,4 +1,5 @@
 <resources>
-    <dimen name="recycler_item_text_size">22sp</dimen>
+    <dimen name="main_recycler_item_text_size">22sp</dimen>
+    <dimen name="ranging_recycler_item_text_size">16sp</dimen>
     <!--<dimen name="fab_margin">16dp</dimen>-->
 </resources>

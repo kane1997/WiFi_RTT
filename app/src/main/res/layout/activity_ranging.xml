@@ -7,19 +7,8 @@
     android:layout_height="match_parent"
     android:onClick="onClickLogRTT">
 
-    <!--
     <TextView
-        android:id="@+id/RangingResultList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/delayBeforeNextRequest"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-        -->
-
-    <TextView
-        android:id="@+id/delayBeforeNextRequest"
+        android:id="@+id/textViewDelayBeforeNextRequest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
@@ -35,14 +24,17 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="116dp"
         android:ems="10"
+        android:importantForAutofill="no"
         android:inputType="number"
+        android:minHeight="48dp"
         android:textAlignment="center"
         android:textSize="16sp"
+        android:labelFor="@id/delayValue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toEndOf="@+id/delayBeforeNextRequest"
-        android:importantForAutofill="no" />
+        app:layout_constraintStart_toEndOf="@+id/textViewDelayBeforeNextRequest"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <Button
         android:id="@+id/btnLogRTT"
@@ -53,8 +45,58 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/delayBeforeNextRequest" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewDelayBeforeNextRequest" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewResults"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewRange" />
+
+    <TextView
+        android:id="@+id/textViewBSSID_Ranging"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/BSSIDHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewRange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/RangeHeader"
+        app:layout_constraintStart_toEndOf="@+id/textViewBSSID_Ranging"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewRangeSD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/Range_SDHeader"
+        app:layout_constraintStart_toEndOf="@+id/textViewRange"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewRSS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/RSSHeader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textViewRangeSD"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--
     <TextView
         android:id="@+id/Mac_1"
         android:layout_width="wrap_content"
@@ -135,15 +177,6 @@
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/RSSI_2" />
-
-    <TextView
-        android:id="@+id/timestamp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/delayBeforeNextRequest"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Distance_3" />
+        -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
