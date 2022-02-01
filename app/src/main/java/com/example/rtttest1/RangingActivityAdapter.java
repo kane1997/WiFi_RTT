@@ -38,7 +38,6 @@ public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     public void swapData(List<RangingResult> list) {
-        Log.d(TAG,"Swaping");
         Results.clear();
 
         if ((list != null) && (list.size() > 0)){
@@ -46,7 +45,6 @@ public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
         notifyDataSetChanged();
         Log.d(TAG,"Updating");
-        //TODO notifyItemChange()
     }
 
     @NonNull

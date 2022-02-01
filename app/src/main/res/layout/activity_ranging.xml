@@ -57,12 +57,13 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewRange" />
 
     <TextView
-        android:id="@+id/textViewBSSID_Ranging"
+        android:id="@+id/textViewBSSID_Header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
         android:layout_marginTop="24dp"
         android:text="@string/BSSIDHeader"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -73,7 +74,8 @@
         android:layout_marginStart="56dp"
         android:layout_marginTop="24dp"
         android:text="@string/RangeHeader"
-        app:layout_constraintStart_toEndOf="@+id/textViewBSSID_Ranging"
+        android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@+id/textViewBSSID_Header"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -83,6 +85,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="24dp"
         android:text="@string/Range_SDHeader"
+        android:textSize="14sp"
         app:layout_constraintStart_toEndOf="@+id/textViewRange"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -92,9 +95,151 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="@string/RSSHeader"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textViewRangeSD"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewAccelerometerHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="80dp"
+        android:text="@string/AccelerometerHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerViewResults" />
+
+    <TextView
+        android:id="@+id/textViewX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="64dp"
+        android:text="X"
+        app:layout_constraintEnd_toStartOf="@+id/textViewY"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerViewResults" />
+
+    <TextView
+        android:id="@+id/textViewY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="64dp"
+        android:text="Y"
+        app:layout_constraintEnd_toStartOf="@+id/textViewZ"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerViewResults" />
+
+    <TextView
+        android:id="@+id/textViewGyroscopeHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/gyroscopeHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAccelerometerHeader" />
+
+    <TextView
+        android:id="@+id/textViewZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="64dp"
+        android:text="Z"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerViewResults" />
+
+    <TextView
+        android:id="@+id/textViewMagFieldHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/magnetic_field_Header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewGyroscopeHeader" />
+
+    <TextView
+        android:id="@+id/textViewAccX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="44dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewAccY"
+        app:layout_constraintTop_toBottomOf="@+id/textViewX" />
+
+    <TextView
+        android:id="@+id/textViewAccY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="44dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewAccZ"
+        app:layout_constraintTop_toBottomOf="@+id/textViewY" />
+
+    <TextView
+        android:id="@+id/textViewAccZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewZ" />
+
+    <TextView
+        android:id="@+id/textViewGroX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="44dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewGroY"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAccX" />
+
+    <TextView
+        android:id="@+id/textViewGroZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAccZ" />
+
+    <TextView
+        android:id="@+id/textViewGroY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="44dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewGroZ"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAccY" />
+
+    <TextView
+        android:id="@+id/textViewMagZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="52dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewGroZ" />
+
+    <TextView
+        android:id="@+id/textViewMagY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="36dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewMagZ"
+        app:layout_constraintTop_toBottomOf="@+id/textViewGroY" />
+
+    <TextView
+        android:id="@+id/textViewMagX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="36dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewMagY"
+        app:layout_constraintTop_toBottomOf="@+id/textViewGroX" />
 
     <!--
     <TextView

@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(IntentRanging);
     }
 
-    private class WifiScanReceiver extends BroadcastReceiver {
+    public class WifiScanReceiver extends BroadcastReceiver {
         //Only keep RTT supported APs from the original scan list
         private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
             List<ScanResult> RTT_APs = new ArrayList<>();
