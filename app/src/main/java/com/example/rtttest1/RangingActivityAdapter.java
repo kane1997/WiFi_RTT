@@ -1,7 +1,6 @@
 package com.example.rtttest1;
 
 import android.net.wifi.rtt.RangingResult;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import java.util.List;
 
 public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = "RangingActivityAdapter";
+    //private static final String TAG = "RangingActivityAdapter";
     private final List<RangingResult> Results;
 
     public RangingActivityAdapter(List<RangingResult> list){
@@ -44,7 +43,6 @@ public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             Results.addAll(list);
         }
         notifyDataSetChanged();
-        Log.d(TAG,"Updating");
     }
 
     @NonNull

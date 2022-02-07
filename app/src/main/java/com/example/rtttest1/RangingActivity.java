@@ -57,7 +57,8 @@ public class RangingActivity extends AppCompatActivity {
     //flag for leaving the activity
     Boolean Running = true;
 
-    List<RangingResult> list = new ArrayList<>();
+    List<RangingResult> Result_List = new ArrayList<>();
+    ArrayList<ScanResult> RTT_APs;
 
     private EditText RangingDelayEditText;
     private static final int RangingDelayDefault = 100;
@@ -73,7 +74,6 @@ public class RangingActivity extends AppCompatActivity {
     private TextView textViewMagy;
     private TextView textViewMagz;
 
-
     final Handler RangingRequestDelayHandler = new Handler();
 
     @Override
@@ -82,7 +82,7 @@ public class RangingActivity extends AppCompatActivity {
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
-        ArrayList<ScanResult> RTT_APs = intent.getParcelableArrayListExtra("SCAN_RESULT");
+        RTT_APs = intent.getParcelableArrayListExtra("SCAN_RESULT");
 
         if (RTT_APs == null || RTT_APs.isEmpty()) {
             Log.d(TAG,"RTT_APs null");
@@ -108,7 +108,7 @@ public class RangingActivity extends AppCompatActivity {
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
             myRTTResultCallback = new RTTRangingResultCallback();
 
-            rangingActivityAdapter = new RangingActivityAdapter(list);
+            rangingActivityAdapter = new RangingActivityAdapter(Result_List);
             myRecyclerView.setAdapter(rangingActivityAdapter);
 
             //IMU
@@ -142,11 +142,7 @@ public class RangingActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startRangingRequest() {
-        //Log.d(TAG,"startingRangingRequest");
-
-        Intent intent = getIntent();
-        ArrayList<ScanResult> RTT_APs = intent.getParcelableArrayListExtra("SCAN_RESULT");
-
+        Log.d(TAG, String.valueOf(RTT_APs));
         RangingRequest rangingRequest =
                 new RangingRequest.Builder().addAccessPoints(RTT_APs).build();
 
@@ -185,10 +181,13 @@ public class RangingActivity extends AppCompatActivity {
                     LogData_Handler.removeCallbacks(this);
                 } else{
                     //rate of packet sending
-                    LogData_Handler.postDelayed(this,100);
+                    LogData_Handler.postDelayed(this,200);
 
                     //IP address of Nest Router
-                    String url = "http://192.168.86.28:5000/server";
+                    //String url = "http://192.168.86.28:5000/server";
+
+                    //IP address of IoT 2
+                    String url = "http://192.168.86.25:5000/server";
 
                     //IP address of personal hotspot (not working)
                     //String url = "http://172.20.10.2:5000/server";
@@ -199,7 +198,7 @@ public class RangingActivity extends AppCompatActivity {
                     OkHttpClient client = new OkHttpClient.Builder().build();
 
                     RequestBody body = new FormBody.Builder()
-                            .add("RTT_Result", String.valueOf(list))
+                            .add("RTT_Result", String.valueOf(Result_List))
                             .add("IMU_Result", " Accx "+ textViewAccx.getText()
                                     +" Accy "+ textViewAccy.getText()
                                     +" Accz "+ textViewAccz.getText()
@@ -242,8 +241,16 @@ public class RangingActivity extends AppCompatActivity {
 
         private void queueNextRangingRequest(){
             RangingRequestDelayHandler.postDelayed(
-                    RangingActivity.this::startRangingRequest,
-                    RangingDelay);
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            startRangingRequest();
+                        }
+                    },RangingDelay);
+
+
+                    //RangingActivity.this::startRangingRequest,
+                    //RangingDelay);
         }
 
         @Override
@@ -254,7 +261,7 @@ public class RangingActivity extends AppCompatActivity {
 
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            Log.d(TAG,"Ranging successful");
+            //Log.d(TAG,"Ranging successful");
             Log.d(TAG, list.toString());
 
             int status = 0;
@@ -262,12 +269,12 @@ public class RangingActivity extends AppCompatActivity {
             for (RangingResult r:list){
                 status += r.getStatus();
             }
-            Log.d(TAG,"Status: "+ status);
+            //Log.d(TAG,"Status: "+ status);
 
             if (Running && status == 0){
-                Log.d(TAG,"Still running");
+                //Log.d(TAG,"Still running");
                 if (!list.isEmpty()){
-                    Log.d(TAG,"Still swapping");
+                    //Log.d(TAG,"Still swapping");
                     rangingActivityAdapter.swapData(list);
                 }
             }
