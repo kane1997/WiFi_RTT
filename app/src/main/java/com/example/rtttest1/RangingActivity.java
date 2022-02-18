@@ -218,6 +218,7 @@ public class RangingActivity extends AppCompatActivity {
                 if (!Running){
                     LogData_Handler.removeCallbacks(this);
                 } else{
+
                     //rate of packet sending(optimal is 200)
                     LogData_Handler.postDelayed(this,200);
 
@@ -234,6 +235,7 @@ public class RangingActivity extends AppCompatActivity {
                     //Log.d(TAG, String.valueOf(System.currentTimeMillis()));
 
                     RequestBody body = new FormBody.Builder()
+
                             .add("Timestamp", String.valueOf(System.currentTimeMillis()))
                             .add("RTT_Result", String.valueOf(RangingInfo))
                             .add("IMU_Result", " Accx "+ textViewAccx.getText()
@@ -301,8 +303,16 @@ public class RangingActivity extends AppCompatActivity {
 
         private void queueNextRangingRequest(){
             RangingRequestDelayHandler.postDelayed(
-                    RangingActivity.this::startRangingRequest,
-                    RangingDelay);
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            startRangingRequest();
+                        }
+                    },RangingDelay);
+
+
+                    //RangingActivity.this::startRangingRequest,
+                    //RangingDelay);
         }
 
         @Override
@@ -322,6 +332,7 @@ public class RangingActivity extends AppCompatActivity {
             for (RangingResult r:list){
                 status += r.getStatus();
             }
+            
             Log.d(TAG,"Status: "+ status);
              */
 
