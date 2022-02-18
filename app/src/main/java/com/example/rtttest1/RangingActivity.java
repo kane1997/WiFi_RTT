@@ -1,13 +1,16 @@
 package com.example.rtttest1;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
 import android.net.wifi.rtt.RangingResultCallback;
@@ -50,6 +53,8 @@ public class RangingActivity extends AppCompatActivity {
     private WifiRttManager myWifiRTTManager;
     private RTTRangingResultCallback myRTTResultCallback;
     private RangingActivityAdapter rangingActivityAdapter;
+    private WifiManager myWifiManager;
+    private WifiScanReceiver myWifiReceiver;
 
     //IMU
     private SensorManager sensorManager;
@@ -57,8 +62,8 @@ public class RangingActivity extends AppCompatActivity {
     //flag for leaving the activity
     Boolean Running = true;
 
-    List<RangingResult> Result_List = new ArrayList<>();
-    ArrayList<ScanResult> RTT_APs;
+    List<ScanResult> RTT_APs = new ArrayList<>();
+    List<RangingResult> Ranging_Result = new ArrayList<>();
 
     private EditText RangingDelayEditText;
     private static final int RangingDelayDefault = 100;
@@ -107,8 +112,13 @@ public class RangingActivity extends AppCompatActivity {
             //RTT
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
             myRTTResultCallback = new RTTRangingResultCallback();
+            myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            myWifiReceiver = new WifiScanReceiver();
 
-            rangingActivityAdapter = new RangingActivityAdapter(Result_List);
+            registerReceiver(myWifiReceiver,
+                    new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+            rangingActivityAdapter = new RangingActivityAdapter(Ranging_Result);
             myRecyclerView.setAdapter(rangingActivityAdapter);
 
             //IMU
@@ -142,7 +152,7 @@ public class RangingActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startRangingRequest() {
-        Log.d(TAG, String.valueOf(RTT_APs));
+
         RangingRequest rangingRequest =
                 new RangingRequest.Builder().addAccessPoints(RTT_APs).build();
 
@@ -155,6 +165,7 @@ public class RangingActivity extends AppCompatActivity {
         }else{
             Snackbar.make(findViewById(R.id.textViewDelayBeforeNextRequest),
                     "Please enter a valid number",Snackbar.LENGTH_SHORT).show();
+            //TODO edit
         }
     }
 
@@ -167,11 +178,38 @@ public class RangingActivity extends AppCompatActivity {
             sensorManager.unregisterListener(listener_gro);
             sensorManager.unregisterListener(listener_mag);
         }
+        unregisterReceiver(myWifiReceiver);
         Running = false;
     }
 
-    public void onClickLogRTT(View view){
-        Log.d(TAG,"onClickLogRTT()");
+    public void onClickBackgroundScan(View view){
+        Log.d(TAG,"BackgroundScan");
+        Snackbar.make(view,"Start scanning in background",Snackbar.LENGTH_SHORT).show();
+        Handler Update_Handler = new Handler();
+        Runnable Update_Runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!Running){
+                    Update_Handler.removeCallbacks(this);
+                } else{
+                    Update_Handler.postDelayed(this,3000);
+
+                    myWifiManager.startScan();
+                }
+            }
+        };
+        Update_Handler.postDelayed(Update_Runnable,1000);
+    }
+
+    public void onClickLogData(View view){
+        Log.d(TAG,"onClickLogData()");
+
+        //IP address of Nest Router
+        String url = "http://192.168.86.31:5000/server";
+
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        //OkHttpClient client = new OkHttpClient();
+        //OkHttpClient client = new OkHttpClient().newBuilder().build();
 
         Handler LogData_Handler = new Handler();
         Runnable LogData_Runnable = new Runnable() {
@@ -180,25 +218,26 @@ public class RangingActivity extends AppCompatActivity {
                 if (!Running){
                     LogData_Handler.removeCallbacks(this);
                 } else{
-                    //rate of packet sending
+
+                    //rate of packet sending(optimal is 200)
                     LogData_Handler.postDelayed(this,200);
 
-                    //IP address of Nest Router
-                    //String url = "http://192.168.86.28:5000/server";
+                    List<String> RangingInfo = new ArrayList<>();
+                    Log.d(TAG, "Packet:"+ Ranging_Result);
 
-                    //IP address of IoT 2
-                    String url = "http://192.168.86.25:5000/server";
+                    for (RangingResult rangingResult: Ranging_Result){
+                        RangingInfo.add(String.valueOf(rangingResult.getMacAddress()));
+                        RangingInfo.add(String.valueOf(rangingResult.getDistanceMm()));
+                        RangingInfo.add(String.valueOf(rangingResult.getDistanceStdDevMm()));
+                        RangingInfo.add(String.valueOf(rangingResult.getRssi()));
+                    }
 
-                    //IP address of personal hotspot (not working)
-                    //String url = "http://172.20.10.2:5000/server";
-
-                    //IP address of Yilun's laptop
-                    //String url = "http://192.168.137.179:5000/server";
-
-                    OkHttpClient client = new OkHttpClient.Builder().build();
+                    //Log.d(TAG, String.valueOf(System.currentTimeMillis()));
 
                     RequestBody body = new FormBody.Builder()
-                            .add("RTT_Result", String.valueOf(Result_List))
+
+                            .add("Timestamp", String.valueOf(System.currentTimeMillis()))
+                            .add("RTT_Result", String.valueOf(RangingInfo))
                             .add("IMU_Result", " Accx "+ textViewAccx.getText()
                                     +" Accy "+ textViewAccy.getText()
                                     +" Accz "+ textViewAccz.getText()
@@ -227,6 +266,7 @@ public class RangingActivity extends AppCompatActivity {
                         public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                             assert response.body() != null;
                             String result = response.body().string();
+                            response.close();
                             Log.i("result",result);
                         }
                     });
@@ -235,6 +275,28 @@ public class RangingActivity extends AppCompatActivity {
         };
         //wait x ms (only once) before running
         LogData_Handler.postDelayed(LogData_Runnable,1000);
+    }
+
+    private class WifiScanReceiver extends BroadcastReceiver {
+
+        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList){
+            List<ScanResult> new_list = new ArrayList<>();
+            for (ScanResult scanResult:OriginalList){
+                if (scanResult.is80211mcResponder()){
+                    new_list.add(scanResult);
+                }
+            }
+            return new_list;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Snackbar.make(findViewById(R.id.btnBackgroundScan),
+                    "AP list updated",Snackbar.LENGTH_LONG).show();
+            List<ScanResult> scanResults = myWifiManager.getScanResults();
+            RTT_APs = findRTTAPs(scanResults);
+            Log.d(TAG,"Received and updated AP list(" + RTT_APs.size() + "): " + RTT_APs);
+        }
     }
 
     private class RTTRangingResultCallback extends RangingResultCallback {
@@ -256,29 +318,36 @@ public class RangingActivity extends AppCompatActivity {
         @Override
         public void onRangingFailure(int i) {
             Log.d(TAG,"Ranging failed！");
-            queueNextRangingRequest();
+            if (Running) {
+                queueNextRangingRequest();
+            }
         }
 
+        @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            //Log.d(TAG,"Ranging successful");
             Log.d(TAG, list.toString());
 
-            int status = 0;
-
+            /*
             for (RangingResult r:list){
                 status += r.getStatus();
             }
-            //Log.d(TAG,"Status: "+ status);
+            
+            Log.d(TAG,"Status: "+ status);
+             */
 
-            if (Running && status == 0){
-                //Log.d(TAG,"Still running");
-                if (!list.isEmpty()){
-                    //Log.d(TAG,"Still swapping");
-                    rangingActivityAdapter.swapData(list);
+            //Only keep valid ranging results
+            List<RangingResult> status0_list = new ArrayList<>();
+            for (RangingResult r:list){
+                if (r.getStatus() == 0){
+                    status0_list.add(r);
                 }
             }
+
             if (Running){
+                if (!status0_list.isEmpty()){
+                    rangingActivityAdapter.swapData(status0_list);
+                }
                 queueNextRangingRequest();
             }
         }

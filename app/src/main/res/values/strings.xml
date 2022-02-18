@@ -27,5 +27,6 @@
     <string name="AccelerometerHeader">Accelerometer</string>
     <string name="gyroscopeHeader">Gyroscope</string>
     <string name="magnetic_field_Header">Magnetic Field</string>
+    <string name="BackgroundScanButton">Automatic Scan</string>
 
 </resources>
