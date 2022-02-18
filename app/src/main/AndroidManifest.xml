@@ -25,7 +25,10 @@
         android:theme="@style/Theme.WiFi_RTT"
         android:usesCleartextTraffic="true"
         android:fullBackupOnly="true"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:largeHeap="true"
+        android:hardwareAccelerated="false">
+        <!--android:largeHeap="true"-->
 
         <activity
             android:name=".MainActivity"

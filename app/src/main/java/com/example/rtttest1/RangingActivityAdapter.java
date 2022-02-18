@@ -44,7 +44,7 @@ public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             Results.addAll(list);
         }
         notifyDataSetChanged();
-        Log.d(TAG,"Updating");
+        //Log.d(TAG,"Updating");
     }
 
     @NonNull
@@ -74,6 +74,7 @@ public class RangingActivityAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
+        //Log.d(TAG, "Recycler item size: "+ Results.size());
         return Results.size();
     }
 }

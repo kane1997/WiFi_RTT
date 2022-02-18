@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(IntentRanging);
     }
 
-    public class WifiScanReceiver extends BroadcastReceiver {
+    private class WifiScanReceiver extends BroadcastReceiver {
         //Only keep RTT supported APs from the original scan list
         private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
             List<ScanResult> RTT_APs = new ArrayList<>();
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Check RTT availability of the device
     public void onClickCheckRTTAvailability(View view){
-        Log.d(TAG,"Checking RTT Availability");
+        Log.d(TAG,"Checking RTT Availability...");
 
         boolean RTT_availability = getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
