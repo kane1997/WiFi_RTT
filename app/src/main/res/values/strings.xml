@@ -28,5 +28,17 @@
     <string name="gyroscopeHeader">Gyroscope</string>
     <string name="magnetic_field_Header">Magnetic Field</string>
     <string name="BackgroundScanButton">Automatic Scan</string>
+    <string name="AccelerometerX">AccelerometerX: %1$f</string>
+    <string name="AccelerometerY">Y: %1$f</string>
+    <string name="AccelerometerZ">Z: %1$f</string>
+    <string name="Magnetic_FieldX">Magnetic_FieldX: %1$f</string>
+    <string name="Magnetic_FieldY">Y: %1$f</string>
+    <string name="Magnetic_FieldZ">Z: %1$f</string>
+    <string name="GyroscopeX">GyroscopeX: %1$f</string>
+    <string name="GyroscopeY">Y: %1$f</string>
+    <string name="GyroscopeZ">Z: %1$f</string>
+    <string name="StartPositioningButton">Start Positioning</string>
+
+    <string name="ActivityLocalizationLabel">Floor plan</string>
 
 </resources>
