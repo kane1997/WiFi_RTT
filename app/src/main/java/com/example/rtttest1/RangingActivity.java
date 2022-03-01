@@ -206,7 +206,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
 
         //IP address of Nest Router
-        String url = "http://192.168.86.48:5000/server";
+        String url = "http://192.168.86.34:5000/server";
 
         final OkHttpClient client = new OkHttpClient();
 
