@@ -540,7 +540,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG,"onResume() RangingActivity");
         super.onResume();
         registerSensors();
-        startRangingRequest();
         //registerReceiver(myWifiReceiver);
         Running = true;
     }

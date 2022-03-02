@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onResume() MainActivity");
         super.onResume();
 
+
         // each time resume back in onResume state, check location permission
         LocationPermission = ActivityCompat.checkSelfPermission(
                 this, permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;

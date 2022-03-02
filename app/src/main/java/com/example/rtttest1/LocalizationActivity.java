@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LocalizationActivity extends AppCompatActivity implements SensorEventListener {
+
     private static final String TAG = "LocalizationActivity";
 
     //For RTT service
@@ -46,10 +48,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private RTTRangingResultCallback myRTTRangingResultCallback;
     private WifiScanReceiver myWifiScanReceiver;
 
-    private int RangingDelay = 100;
-
     List<ScanResult> RTT_APs = new ArrayList<>();
     List<RangingResult> Ranging_Results = new ArrayList<>();
+    //List<String> APs_MacAddress = new ArrayList<>();
 
     final Handler RangingRequestDelayHandler = new Handler();
 
@@ -59,12 +60,14 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     private float accx, accy, accz, gyrox, gyroy, gyroz, magx, magy, magz;
     private long IMU_timestamp;
+
     //flag for leaving the activity
     Boolean Running = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate() LocalizationActivity");
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
@@ -97,6 +100,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             registerSensors();
             startRangingRequest();
             startLoggingData();
+            //startScanInBackground();
         }
     }
 
@@ -111,7 +115,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     private void startLoggingData(){
         Log.d(TAG,"StartLoggingData() LocalizationActivity");
-        //Snackbar.make(findViewById(R.id.imageViewFloorplan),"Start sending data",Snackbar.LENGTH_SHORT).show();
 
         String url = "http://192.168.86.47:5000/server";
         final OkHttpClient client = new OkHttpClient();
@@ -169,7 +172,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             @Override
             public void run() {
                 if (Running) {
-                    LogIMU_Handler.postDelayed(this,20);
+                    LogIMU_Handler.postDelayed(this,50);
                     RequestBody IMU_Body = new FormBody.Builder()
                             .add("Flag","IMU")
                             .add("Timestamp",String.valueOf(IMU_timestamp))
@@ -212,6 +215,22 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         //wait x ms (only once) before running
         LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
+    }
+
+    private void startScanInBackground(){
+        Handler BackgroundScan_Handler = new Handler();
+        Runnable BackgroundScan_Runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (Running) {
+                    BackgroundScan_Handler.postDelayed(this,3000);
+                    myWifiManager.startScan();
+                } else {
+                    BackgroundScan_Handler.removeCallbacks(this);
+                }
+            }
+        };
+        BackgroundScan_Handler.postDelayed(BackgroundScan_Runnable,1000);
     }
 
     private void registerSensors(){
@@ -276,7 +295,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         //Start next request
         private void queueNextRangingRequest() {
             RangingRequestDelayHandler.postDelayed(
-                    LocalizationActivity.this::startRangingRequest,RangingDelay);
+                    LocalizationActivity.this::startRangingRequest, 100);
         }
 
         @Override
@@ -287,14 +306,12 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            List<RangingResult> successful_requests = new ArrayList<>();
+            Ranging_Results.clear();
             for (RangingResult result:list) {
                 if (result.getStatus() == 0){
-                    successful_requests.add(result);
+                    Ranging_Results.add(result);
                 }
             }
-
-            Ranging_Results = successful_requests;
             queueNextRangingRequest();
         }
     }
@@ -308,13 +325,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         Running = false;
     }
 
-    /*
     protected void onResume() {
         Log.d(TAG,"onResume() LocalizationActivity");
         super.onResume();
-        registerSensors();
-        startRangingRequest();
         Running = true;
     }
-     */
 }
