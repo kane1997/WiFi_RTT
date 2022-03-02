@@ -16,4 +16,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/floor_plan" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,23 +10,12 @@
     <Button
         android:id="@+id/btn1CheckRTT"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"
         android:onClick="onClickCheckRTTAvailability"
         android:text="@string/CheckRTTAvailability"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btn2ScanAPs"
-        android:layout_width="110dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="16dp"
-        android:onClick="onClickScanAPs"
-        android:text="@string/ScanAPS"
-        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
-        app:layout_constraintEnd_toStartOf="@+id/btn3Ranging"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!--
@@ -44,14 +33,25 @@
 
 
     <Button
+        android:id="@+id/btn2ScanAPs"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="onClickScanAPs"
+        android:text="@string/ScanAPS"
+        app:layout_constraintBottom_toTopOf="@+id/btn4StartPositioning"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
         android:id="@+id/btn3Ranging"
         android:layout_width="110dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="68dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="8dp"
         android:onClick="onClickRangingAPs"
         android:text="@string/Ranging"
-        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        app:layout_constraintBottom_toTopOf="@+id/btn4StartPositioning"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -84,5 +84,16 @@
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn4StartPositioning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:onClick="onClickStartPositioning"
+        android:text="@string/StartPositioningButton"
+        app:layout_constraintBottom_toTopOf="@+id/btn1CheckRTT"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -64,29 +64,6 @@ public class MainActivity extends AppCompatActivity {
         //Scan_result_textview = findViewById(R.id.ScanResult);
     }
 
-    @Override
-    protected void onResume() {
-        Log.d(TAG, "onResume() MainActivity");
-        super.onResume();
-
-        // each time resume back in onResume state, check location permission
-        LocationPermission = ActivityCompat.checkSelfPermission(
-                this, permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        Log.d(TAG, "Location permission:" + LocationPermission);
-
-        //register a Broadcast receiver to run in the main activity thread
-        registerReceiver(
-                myWifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop() MainActivity");
-        super.onStop();
-        unregisterReceiver(myWifiReceiver);
-    }
-
     //Scan surrounding WiFi points
     public void onClickScanAPs(View view) {
         Log.d(TAG,"onClickScanAPs()");
@@ -110,10 +87,32 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG,"onClickRangingAPs()");
 
         Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
-
-        //Pass AP_list_support_RTT to next activity
         IntentRanging.putParcelableArrayListExtra("SCAN_RESULT", AP_list_support_RTT);
         startActivity(IntentRanging);
+    }
+
+    //Check RTT availability of the device
+    public void onClickCheckRTTAvailability(View view){
+        Log.d(TAG,"Checking RTT Availability...");
+
+        boolean RTT_availability = getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
+
+        if (RTT_availability) {
+            Snackbar.make(view, "RTT supported on this device :)",
+                    Snackbar.LENGTH_LONG).show();
+        } else {
+            Snackbar.make(view, "RTT not supported on this device :(",
+                    Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    public void onClickStartPositioning(View view){
+        Log.d(TAG,"onClickStartPositioning()");
+
+        Intent intentPositioning = new Intent(getApplicationContext(), LocalizationActivity.class);
+        intentPositioning.putParcelableArrayListExtra("SCAN_RESULT",AP_list_support_RTT);
+        startActivity(intentPositioning);
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
@@ -148,19 +147,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //Check RTT availability of the device
-    public void onClickCheckRTTAvailability(View view){
-        Log.d(TAG,"Checking RTT Availability...");
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop() MainActivity");
+        super.onStop();
+        unregisterReceiver(myWifiReceiver);
+    }
 
-        boolean RTT_availability = getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
+    @Override
+    protected void onResume() {
+        Log.d(TAG, "onResume() MainActivity");
+        super.onResume();
 
-        if (RTT_availability) {
-            Snackbar.make(view, "RTT supported on this device :)",
-                    Snackbar.LENGTH_LONG).show();
-        } else {
-            Snackbar.make(view, "RTT not supported on this device :(",
-                    Snackbar.LENGTH_LONG).show();
-        }
+        // each time resume back in onResume state, check location permission
+        LocationPermission = ActivityCompat.checkSelfPermission(
+                this, permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        Log.d(TAG, "Location permission:" + LocationPermission);
+
+        //register a Broadcast receiver to run in the main activity thread
+        registerReceiver(
+                myWifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 }

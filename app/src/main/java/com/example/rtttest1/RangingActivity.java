@@ -56,7 +56,10 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private RTTRangingResultCallback myRTTResultCallback;
     private RangingActivityAdapter rangingActivityAdapter;
     private WifiManager myWifiManager;
-    private WifiScanReceiver myWifiReceiver;
+
+    List<ScanResult> RTT_APs = new ArrayList<>();
+    List<RangingResult> Ranging_Result = new ArrayList<>();
+    //List<String> RangingInfo = new ArrayList<>();
 
     //IMU
     private SensorManager sensorManager;
@@ -65,16 +68,19 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     //flag for leaving the activity
     Boolean Running = true;
 
-    List<ScanResult> RTT_APs = new ArrayList<>();
-    List<RangingResult> Ranging_Result = new ArrayList<>();
-
     private EditText RangingDelayEditText;
     private static final int RangingDelayDefault = 100;
     private int RangingDelay;
 
-    private TextView textAccx, textAccy, textAccz;
-    private TextView textGrox, textGroy, textGroz;
-    private TextView textMagx, textMagy, textMagz;
+    private TextView textAccx;
+    private TextView textAccy;
+    private TextView textAccz;
+    private TextView textGrox;
+    private TextView textGroy;
+    private TextView textGroz;
+    private TextView textMagx;
+    private TextView textMagy;
+    private TextView textMagz;
 
     public float accx,accy,accz,gyrox,gyroy,gyroz,magx,magy,magz;
     public long IMU_timestamp;
@@ -113,7 +119,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
             myRTTResultCallback = new RTTRangingResultCallback();
             myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            myWifiReceiver = new WifiScanReceiver();
+            WifiScanReceiver myWifiReceiver = new WifiScanReceiver();
 
             registerReceiver(myWifiReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -136,9 +142,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
             sensors.put("Accelerometer",sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
             sensors.put("Gyroscope",sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
-            sensors.put("Magnetic_field",sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
-
+            sensors.put("Magnetic",sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
             registerSensors();
+
             startRangingRequest();
         }
     }
@@ -158,6 +164,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     @SuppressLint("MissingPermission")
     private void startRangingRequest() {
+
         RangingRequest rangingRequest =
                 new RangingRequest.Builder().addAccessPoints(RTT_APs).build();
 
@@ -184,6 +191,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 if (!Running){
                     Update_Handler.removeCallbacks(this);
                 } else{
+                    //background scan rate
                     Update_Handler.postDelayed(this,3000);
 
                     myWifiManager.startScan();
@@ -195,17 +203,65 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     public void onClickLogData(View view){
         Log.d(TAG,"onClickLogData()");
-
-        EditText url_text = findViewById(R.id.editTextURL);
-        String url_bit = url_text.getText().toString();
+        Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
 
         //IP address of Nest Router
-        String url = "http://192.168.86." + url_bit + ":5000/server";
-        //String url = "http://192.168.86.31:5000/server";
+        String url = "http://192.168.86.34:5000/server";
 
-        //OkHttpClient client = new OkHttpClient.Builder().build();
         final OkHttpClient client = new OkHttpClient();
-        //OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+        /*
+        Thread RTT_thread = new Thread(() -> {
+            while (Running) {
+                RangingInfo.clear();
+                //rate of RTT packet sending(optimal is 200)
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG,"1");
+
+                for (RangingResult rangingResult: Ranging_Result){
+                    RangingInfo.add(String.valueOf(rangingResult.getMacAddress()));
+                    RangingInfo.add(String.valueOf(rangingResult.getDistanceMm()));
+                    RangingInfo.add(String.valueOf(rangingResult.getDistanceStdDevMm()));
+                    RangingInfo.add(String.valueOf(rangingResult.getRssi()));
+                }
+                Log.d(TAG,"2");
+
+                RequestBody RTT_body = new FormBody.Builder()
+                        .add("Flag","RTT")
+                        .add("Timestamp", String.valueOf(SystemClock.elapsedRealtime()))
+                        .add("RTT_Result", String.valueOf(RangingInfo))
+                        .build();
+
+                Request RTT_request = new Request.Builder()
+                        .url(url)
+                        .post(RTT_body)
+                        .build();
+
+                final Call call = client.newCall(RTT_request);
+
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("onFailure", e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response)
+                            throws IOException {
+                        String result = response.body().string();
+                        response.close();
+                        Log.i("result",result);
+                    }
+                });
+            }
+        });
+        RTT_thread.start();
+
+         */
 
         Handler LogRTT_Handler = new Handler();
         Runnable LogRTT_Runnable = new Runnable() {
@@ -214,6 +270,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 if (!Running){
                     LogRTT_Handler.removeCallbacks(this);
                 } else{
+                    //RangingInfo.clear();
                     //rate of RTT packet sending(optimal is 200)
                     LogRTT_Handler.postDelayed(this,200);
 
@@ -255,17 +312,64 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
         };
 
+        Thread IMU_thread = new Thread(() -> {
+            while (Running) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                RequestBody IMU_Body = new FormBody.Builder()
+                        .add("Flag","IMU")
+                        .add("Timestamp",String.valueOf(IMU_timestamp))
+                        .add("accx", String.valueOf(accx))
+                        .add("accy", String.valueOf(accy))
+                        .add("accz", String.valueOf(accz))
+                        .add("gyrox", String.valueOf(gyrox))
+                        .add("gyroy", String.valueOf(gyroy))
+                        .add("gyroz", String.valueOf(gyroz))
+                        .add("magx", String.valueOf(magx))
+                        .add("magy", String.valueOf(magy))
+                        .add("magz", String.valueOf(magz))
+                        .build();
+
+                Request IMU_Request = new Request.Builder()
+                        .url(url)
+                        .post(IMU_Body)
+                        .build();
+
+                final Call call = client.newCall(IMU_Request);
+
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("onFailure",e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response)
+                            throws IOException {
+                        String result = response.body().string();
+                        response.close();
+                        Log.i("result",result);
+                    }
+                });
+            }
+        });
+        IMU_thread.start();
+
+        /*
         Handler LogIMU_Handler = new Handler();
         Runnable LogIMU_Runnable = new Runnable() {
             @Override
             public void run() {
-                if (!Running) {
+                if (!Running){
                     LogIMU_Handler.removeCallbacks(this);
                 } else {
-                    LogIMU_Handler.postDelayed(this, 20);
+                    LogIMU_Handler.postDelayed(this,20);
                     RequestBody IMU_Body = new FormBody.Builder()
-                            .add("Flag", "IMU")
-                            .add("Timestamp", String.valueOf(IMU_timestamp))
+                            .add("Flag","IMU")
+                            .add("Timestamp",String.valueOf(IMU_timestamp))
                             .add("accx", String.valueOf(accx))
                             .add("accy", String.valueOf(accy))
                             .add("accz", String.valueOf(accz))
@@ -276,35 +380,42 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                             .add("magy", String.valueOf(magy))
                             .add("magz", String.valueOf(magz))
                             .build();
+
                     Request IMU_Request = new Request.Builder()
                             .url(url)
                             .post(IMU_Body)
                             .build();
+
                     final Call call = client.newCall(IMU_Request);
+
                     call.enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            Log.i("onFailure", e.getMessage());
+                            Log.i("onFailure",e.getMessage());
                         }
 
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response) {
                             response.close();
-                            Log.i("result", String.valueOf(response.body()));
+                            Log.i("result",String.valueOf(response.body()));
                         }
                     });
                 }
             }
         };
         //wait x ms (only once) before running
-        LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
+
         LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
+         */
+        LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
+
+
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         IMU_timestamp = SystemClock.elapsedRealtime();
-        switch (sensorEvent.sensor.getType()) {
+        switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.d(TAG, "Acc: "+sensorEvent.timestamp);
                 accx = sensorEvent.values[0];
@@ -317,6 +428,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
+
                  */
                 break;
 
@@ -332,6 +444,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
+
                  */
                 break;
 
@@ -347,13 +460,13 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
+
                  */
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
@@ -371,9 +484,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @Override
         public void onReceive(Context context, Intent intent) {
             Snackbar.make(findViewById(R.id.btnBackgroundScan),
-                    "AP list updated",Snackbar.LENGTH_LONG).show();
-            List<ScanResult> scanResults = myWifiManager.getScanResults();
-            RTT_APs = findRTTAPs(scanResults);
+                    "AP list updated",Snackbar.LENGTH_SHORT).show();
+            RTT_APs = findRTTAPs(myWifiManager.getScanResults());
             Log.d(TAG,"Received and updated AP list(" + RTT_APs.size() + "): " + RTT_APs);
         }
     }
@@ -398,6 +510,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         public void onRangingResults(@NonNull List<RangingResult> list) {
             Log.d(TAG, list.toString());
 
+            //Only keep valid ranging results
             List<RangingResult> status0_list = new ArrayList<>();
             for (RangingResult r:list){
                 if (r.getStatus() == 0){
@@ -419,7 +532,16 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG, "onStop() RangingActivity");
         super.onStop();
         unregisterSensors();
-        unregisterReceiver(myWifiReceiver);
+        //unregisterReceiver(myWifiReceiver);
         Running = false;
+    }
+
+    protected void onResume() {
+        Log.d(TAG,"onResume() RangingActivity");
+        super.onResume();
+        registerSensors();
+        startRangingRequest();
+        //registerReceiver(myWifiReceiver);
+        Running = true;
     }
 }
