@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageViewFloorplan"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/floor_plan"
+        android:layout_gravity="center"/>
+
+</FrameLayout>
+
+
+<!--
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageViewFloorplan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/floor_plan" />
+
+    <ImageView
+        android:id="@+id/imageViewLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/location_pin"
+        tools:layout_editor_absoluteX="241dp"
+        tools:layout_editor_absoluteY="470dp" />
+
+    <ImageView
+        android:id="@+id/imageViewAP1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="255dp"
+        tools:layout_editor_absoluteY="236dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
+
+    <ImageView
+        android:id="@+id/imageViewAP2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="283dp" />
+
+    <ImageView
+        android:id="@+id/imageViewAP3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="245dp"
+        tools:layout_editor_absoluteY="334dp" />
+
+    <ImageView
+        android:id="@+id/imageViewAP4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="415dp" />
+
+    <ImageView
+        android:id="@+id/imageViewAP5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="245dp"
+        tools:layout_editor_absoluteY="520dp" />
+
+    <ImageView
+        android:id="@+id/imageViewAP6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin"
+        tools:layout_editor_absoluteX="216dp"
+        tools:layout_editor_absoluteY="597dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+-->

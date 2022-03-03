@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -80,7 +81,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     Toast.LENGTH_SHORT).show();
             finish();
         } else {
-            setContentView(R.layout.activity_localization);
+            setContentView(R.layout.activity_localization_test);
 
             //RTT Initiation
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
@@ -94,7 +95,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             for (ScanResult AP:RTT_APs){
                 APs_MacAddress.add(AP.BSSID);
             }
-            Log.d(TAG,String.valueOf(APs_MacAddress));
 
             //IMU Initiation
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -102,12 +102,29 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             sensors.put("Gyroscope", sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
             sensors.put("Magnetic", sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
 
+            //Localization initiation
+            ImageView floor_plan = findViewById(R.id.imageViewFloorplan);
+            int[] location = new int[2];
+            floor_plan.getLocationOnScreen(location);
+
+            Log.d(TAG,"X: "+location[0]+"Y: "+location[1]);
+            //floor_plan.getImageMatrix();
+            //TODO
+
             registerSensors();
             startRangingRequest();
             startLoggingData();
             startScanInBackground();
             Log.d(TAG,"Start localization");
         }
+    }
+
+    private void set_AP_pins(){
+
+    }
+
+    private void update_location_pin(){
+
     }
 
     @SuppressLint("MissingPermission")
@@ -279,20 +296,17 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
-        //Only keep RTT APs
-        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList){
-            List<ScanResult> new_list = new ArrayList<>();
-            for (ScanResult scanResult:OriginalList){
-                if (scanResult.is80211mcResponder()){
-                    new_list.add(scanResult);
-                }
-            }
-            return new_list;
-        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            RTT_APs = findRTTAPs(myWifiManager.getScanResults());
+            for (ScanResult scanResult:myWifiManager.getScanResults()){
+                if (scanResult.is80211mcResponder()) {
+                    if (!APs_MacAddress.contains(scanResult.BSSID)) {
+                        RTT_APs.add(scanResult);
+                    }
+                }
+            }
+            //TODO Handle getmaxpeers
         }
     }
 
@@ -321,6 +335,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             queueNextRangingRequest();
         }
     }
+
+
 
     @Override
     protected void onStop() {
