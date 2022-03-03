@@ -79,6 +79,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     public float accx,accy,accz,gyrox,gyroy,gyroz,magx,magy,magz;
     public long IMU_timestamp;
 
+    private final float[] LastAccReading = new float[3];
+    private final float[] LastMagReading = new float[3];
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
+
     final Handler RangingRequestDelayHandler = new Handler();
 
     @Override
@@ -246,9 +251,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         }
 
                         @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        public void onResponse(@NonNull Call call, @NonNull Response response)
+                                throws IOException {
+                            String result = response.body().string();
                             response.close();
-                            Log.i("result",String.valueOf(response.body()));
+                            Log.i("result",result);
                         }
                     });
                 }
@@ -262,19 +269,19 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 if (!Running) {
                     LogIMU_Handler.removeCallbacks(this);
                 } else {
-                    LogIMU_Handler.postDelayed(this, 20);
+                    LogIMU_Handler.postDelayed(this, 50);
                     RequestBody IMU_Body = new FormBody.Builder()
                             .add("Flag", "IMU")
                             .add("Timestamp", String.valueOf(IMU_timestamp))
-                            .add("accx", String.valueOf(accx))
-                            .add("accy", String.valueOf(accy))
-                            .add("accz", String.valueOf(accz))
-                            .add("gyrox", String.valueOf(gyrox))
-                            .add("gyroy", String.valueOf(gyroy))
-                            .add("gyroz", String.valueOf(gyroz))
-                            .add("magx", String.valueOf(magx))
-                            .add("magy", String.valueOf(magy))
-                            .add("magz", String.valueOf(magz))
+                            .add("Accx", String.valueOf(accx))
+                            .add("Accy", String.valueOf(accy))
+                            .add("Accz", String.valueOf(accz))
+                            .add("Gyrox", String.valueOf(gyrox))
+                            .add("Gyroy", String.valueOf(gyroy))
+                            .add("Gyroz", String.valueOf(gyroz))
+                            .add("Azimuth", String.valueOf(orientationAngles[0]))
+                            .add("Pitch", String.valueOf(orientationAngles[1]))
+                            .add("Roll", String.valueOf(orientationAngles[2]))
                             .build();
                     Request IMU_Request = new Request.Builder()
                             .url(url)
@@ -288,9 +295,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         }
 
                         @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        public void onResponse(@NonNull Call call, @NonNull Response response)
+                                throws IOException {
+                            String result = response.body().string();
                             response.close();
-                            Log.i("result", String.valueOf(response.body()));
+                            Log.i("result", result);
                         }
                     });
                 }
@@ -349,6 +358,14 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textGroz.setText(GyroZ);
                  */
         }
+
+        // Rotation matrix based on current readings from accelerometer and magnetometer.
+        SensorManager.getRotationMatrix(rotationMatrix, null,
+                LastAccReading, LastMagReading);
+        // Express the updated rotation matrix as three orientation angles.
+        SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+        //Log.i("OrientationTestActivity",String.format("Orientation: %f, %f, %f", orientationAngles[0],orientationAngles[1],orientationAngles[2]));
     }
 
     @Override
@@ -396,7 +413,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            Log.d(TAG, list.toString());
+            //Log.d(TAG, list.toString());
 
             List<RangingResult> status0_list = new ArrayList<>();
             for (RangingResult r:list){
