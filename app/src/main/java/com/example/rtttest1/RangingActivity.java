@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -208,9 +209,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         String url = "http://192.168.86." + url_bit + ":5000/server";
         //String url = "http://192.168.86.31:5000/server";
 
-        //OkHttpClient client = new OkHttpClient.Builder().build();
         final OkHttpClient client = new OkHttpClient();
-        //OkHttpClient client = new OkHttpClient().newBuilder().build();
 
         Handler LogRTT_Handler = new Handler();
         Runnable LogRTT_Runnable = new Runnable() {
@@ -253,7 +252,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response)
                                 throws IOException {
-                            String result = response.body().string();
+                            String result = Objects.requireNonNull(response.body()).string();
                             response.close();
                             Log.i("result",result);
                         }
@@ -270,6 +269,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     LogIMU_Handler.removeCallbacks(this);
                 } else {
                     LogIMU_Handler.postDelayed(this, 50);
+
+                    Log.d(TAG, String.valueOf(orientationAngles[0]));
                     RequestBody IMU_Body = new FormBody.Builder()
                             .add("Flag", "IMU")
                             .add("Timestamp", String.valueOf(IMU_timestamp))
@@ -283,10 +284,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                             .add("Pitch", String.valueOf(orientationAngles[1]))
                             .add("Roll", String.valueOf(orientationAngles[2]))
                             .build();
+
                     Request IMU_Request = new Request.Builder()
                             .url(url)
                             .post(IMU_Body)
                             .build();
+
                     final Call call = client.newCall(IMU_Request);
                     call.enqueue(new Callback() {
                         @Override
@@ -297,7 +300,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response)
                                 throws IOException {
-                            String result = response.body().string();
+                            String result = Objects.requireNonNull(response.body()).string();
                             response.close();
                             Log.i("result", result);
                         }
@@ -315,7 +318,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         IMU_timestamp = SystemClock.elapsedRealtime();
         switch (sensorEvent.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                //Log.d(TAG, "Acc: "+sensorEvent.timestamp);
+                System.arraycopy(sensorEvent.values,0,LastAccReading,0,sensorEvent.values.length);
                 accx = sensorEvent.values[0];
                 accy = sensorEvent.values[1];
                 accz = sensorEvent.values[2];
@@ -330,7 +333,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
-                //Log.d(TAG, "Mag: "+sensorEvent.timestamp);
+                System.arraycopy(sensorEvent.values,0,LastMagReading,0,sensorEvent.values.length);
                 magx = sensorEvent.values[0];
                 magy = sensorEvent.values[1];
                 magz = sensorEvent.values[2];
@@ -345,7 +348,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
-                //Log.d(TAG,"Gyr: "+sensorEvent.timestamp);
                 gyrox = sensorEvent.values[0];
                 gyroy = sensorEvent.values[1];
                 gyroz = sensorEvent.values[2];
