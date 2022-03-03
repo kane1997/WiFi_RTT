@@ -50,7 +50,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     List<ScanResult> RTT_APs = new ArrayList<>();
     List<RangingResult> Ranging_Results = new ArrayList<>();
-    //List<String> APs_MacAddress = new ArrayList<>();
+    List<String> APs_MacAddress = new ArrayList<>();
 
     final Handler RangingRequestDelayHandler = new Handler();
 
@@ -91,6 +91,11 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             registerReceiver(myWifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
+            for (ScanResult AP:RTT_APs){
+                APs_MacAddress.add(AP.BSSID);
+            }
+            Log.d(TAG,String.valueOf(APs_MacAddress));
+
             //IMU Initiation
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             sensors.put("Accelerometer", sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
@@ -100,7 +105,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             registerSensors();
             startRangingRequest();
             startLoggingData();
-            //startScanInBackground();
+            startScanInBackground();
+            Log.d(TAG,"Start localization");
         }
     }
 
