@@ -9,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.Image;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.rtt.RangingRequest;
@@ -62,6 +63,12 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private float accx, accy, accz, gyrox, gyroy, gyroz, magx, magy, magz;
     private long IMU_timestamp;
 
+    //For Localization service
+    private ImageView floor_plan, AP1, AP2, AP3, AP4, AP5, AP6;
+    int[] floor_plan_location = new int[2]; //241,145
+
+    //TODO try hashmap
+
     //flag for leaving the activity
     Boolean Running = true;
 
@@ -69,6 +76,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Log.d(TAG,"onCreate() LocalizationActivity");
+        getSupportActionBar().hide();
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
@@ -103,19 +111,27 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             sensors.put("Magnetic", sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
 
             //Localization initiation
-            ImageView floor_plan = findViewById(R.id.imageViewFloorplan);
-            int[] location = new int[2];
-            floor_plan.getLocationOnScreen(location);
+            floor_plan = findViewById(R.id.imageViewFloorplan);
+            AP1 = findViewById(R.id.imageViewAP1);
 
-            Log.d(TAG,"X: "+location[0]+"Y: "+location[1]);
-            //floor_plan.getImageMatrix();
-            //TODO
-
+            //set_AP_pins();
             registerSensors();
             startRangingRequest();
-            startLoggingData();
+            //startLoggingData();
             startScanInBackground();
             Log.d(TAG,"Start localization");
+        }
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            //left top coordinate
+            floor_plan.getLocationOnScreen(floor_plan_location);
+            floor_plan.getLayoutParams();
+            Log.d(TAG,floor_plan_location[0]+", "+ floor_plan_location[1]);
+            Log.d(TAG, "Image Width: " + floor_plan.getWidth()); //597
+            Log.d(TAG, "Image Height: " + floor_plan.getHeight()); //2151
         }
     }
 

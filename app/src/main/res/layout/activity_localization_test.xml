@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/imageViewFloorplan"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/floor_plan"
-        android:layout_gravity="center"/>
+        android:scaleType="centerInside"
+        android:src="@drawable/floor_plan" />
+
+    <ImageView
+        android:id="@+id/imageViewAP1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="262px"
+        android:layout_marginTop="299px"
+        android:rotation="90"
+        app:srcCompat="@drawable/ap_pin" />
 
 </FrameLayout>
 
