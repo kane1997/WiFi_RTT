@@ -20,7 +20,8 @@
     <string name="ActivityRangingLabel">Ranging Results</string>
     <string name="DelayBeforeNextRequest">RTT Ranging Delay (ms)</string>
     <string name="DelayHint">1000</string>
-    <string name="LogButton">Log data</string>
+    <string name="StartLogButton">Start logging</string>
+    <string name="StopLogButton">Stop logging</string>
     <string name="RangeHeader">Range(mm)</string>
     <string name="Range_SDHeader">Range_SD(mm)</string>
     <string name="RSSHeader">RSS(dB)</string>

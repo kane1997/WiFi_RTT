@@ -313,6 +313,14 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
     }
 
+    /*
+    public void onClickStopLog(View view){
+        Log.d(TAG,"onClickStopLog");
+        Running = false;
+        //TODO
+    }
+     */
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         IMU_timestamp = SystemClock.elapsedRealtime();

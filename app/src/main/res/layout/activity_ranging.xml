@@ -228,28 +228,25 @@
         android:layout_marginEnd="36dp"
         app:layout_constraintEnd_toStartOf="@+id/textViewMagY"
         app:layout_constraintTop_toBottomOf="@+id/textViewGroX" />
-  
+
     <Button
         android:id="@+id/btnBackgroundScan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="48dp"
         android:layout_marginBottom="8dp"
         android:onClick="onClickBackgroundScan"
         android:text="@string/BackgroundScanButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDelayBeforeNextRequest" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnLogRTT"
+        android:id="@+id/btnStartLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:onClick="onClickLogData"
-        android:text="@string/LogButton"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnBackgroundScan"
+        android:text="@string/StartLogButton"
+        app:layout_constraintBottom_toTopOf="@+id/btnBackgroundScan"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewDelayBeforeNextRequest" />
 
@@ -264,5 +261,15 @@
         app:layout_constraintBottom_toTopOf="@+id/delayValue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnStopLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClickStopLog"
+        android:text="@string/StopLogButton"
+        app:layout_constraintBottom_toTopOf="@+id/btnBackgroundScan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDelayBeforeNextRequest" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
