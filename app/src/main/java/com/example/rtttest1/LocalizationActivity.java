@@ -9,7 +9,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.rtt.RangingRequest;
@@ -66,6 +65,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     //For Localization service
     private ImageView floor_plan, AP1, AP2, AP3, AP4, AP5, AP6;
     int[] floor_plan_location = new int[2]; //241,145
+    int[] AP_location = new int[2];
 
     //TODO try hashmap
 
@@ -113,30 +113,57 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             //Localization initiation
             floor_plan = findViewById(R.id.imageViewFloorplan);
             AP1 = findViewById(R.id.imageViewAP1);
+            //AP2 = findViewById(R.id.imageViewAP2);
+            //AP3 = findViewById(R.id.imageViewAP3);
+            //AP4 = findViewById(R.id.imageViewAP4);
+            //AP5 = findViewById(R.id.imageViewAP5);
+            //AP6 = findViewById(R.id.imageViewAP6);
 
-            //set_AP_pins();
-            registerSensors();
-            startRangingRequest();
+            set_AP_pins();
+            //registerSensors();
+            //startRangingRequest();
             //startLoggingData();
-            startScanInBackground();
+            //startScanInBackground();
             Log.d(TAG,"Start localization");
         }
     }
+
+    /*
 
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             //left top coordinate
-            floor_plan.getLocationOnScreen(floor_plan_location);
-            floor_plan.getLayoutParams();
-            Log.d(TAG,floor_plan_location[0]+", "+ floor_plan_location[1]);
-            Log.d(TAG, "Image Width: " + floor_plan.getWidth()); //597
-            Log.d(TAG, "Image Height: " + floor_plan.getHeight()); //2151
+            //floor_plan.getLocationOnScreen(floor_plan_location);
+            //floor_plan.getLayoutParams();
+            Log.i(TAG,floor_plan_location[0]+", "+ floor_plan_location[1]);
+            Log.i(TAG,AP_location[0]+", "+AP_location[1]);
+            Log.i(TAG, "Image Width: " + floor_plan.getWidth()); //597
+            Log.i(TAG, "Image Height: " + floor_plan.getHeight()); //2151
+
+            //Top left corner of the screen display (origin) is (55,145)
+
+
         }
     }
 
-    private void set_AP_pins(){
+     */
 
+    private void set_AP_pins(){
+        //AP1.setLeft(241);
+        //AP1.setTop(145);
+        /*
+        AP2.setLeft(241);
+        AP2.setTop(145);
+        AP3.setLeft(241);
+        AP3.setTop(145);
+        AP4.setLeft(241);
+        AP4.setTop(145);
+        AP5.setLeft(241);
+        AP5.setTop(145);
+        AP6.setLeft(241);
+        AP6.setTop(145);
+         */
     }
 
     private void update_location_pin(){
