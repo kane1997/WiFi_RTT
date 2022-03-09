@@ -68,6 +68,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     int[] AP_location = new int[2];
     int[] pin_location = new int[2];
 
+    int i,j;
+
     //TODO try hashmap
 
     //flag for leaving the activity
@@ -90,7 +92,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     Toast.LENGTH_SHORT).show();
             finish();
         } else {
-            setContentView(R.layout.activity_localization_test);
+            setContentView(R.layout.activity_localization);
 
             //RTT Initiation
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
@@ -122,6 +124,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             AP5 = findViewById(R.id.imageViewAP5);
             AP6 = findViewById(R.id.imageViewAP6);
 
+
             set_AP_pins();
             //registerSensors();
             //startRangingRequest();
@@ -152,6 +155,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     /**
      * top left corner of the screen (55,145)
      * top left corner of the floor plan (241,145)
+     * width of floor plan (597), height of floor plan (2151)
      * setX = y*32.533+241, setY = x*32.533
      */
 
@@ -170,11 +174,31 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         AP6.setY(616);
     }
 
+
+
     private void update_location_pin(){
         //TODO better coordinate system
-
         location_pin.setX(392+241);
         location_pin.setY(570);
+        i = 1500;
+        j = 570;
+
+        location_pin.getLocationOnScreen(pin_location);
+        Handler Update_location_Handler = new Handler();
+        Runnable Update_location_Runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (Running && (pin_location[1] < i )){
+                    Update_location_Handler.postDelayed(this,1000);
+                    j += 50;
+                    location_pin.setY(j);
+                    location_pin.getLocationOnScreen(pin_location);
+                } else {
+                    Update_location_Handler.removeCallbacks(this);
+                }
+            }
+        };
+        Update_location_Handler.postDelayed(Update_location_Runnable,1000);
     }
 
     @SuppressLint("MissingPermission")

@@ -57,10 +57,6 @@
             android:parentActivityName=".RangingActivity">
         </activity>
 
-        <service android:name=".LocalizationRangingService_test"
-            android:label="@string/ServiceLocalizationRanging">
-        </service>
-
     </application>
 
 </manifest>

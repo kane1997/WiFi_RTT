@@ -41,6 +41,7 @@
 
     <!-- activity_localization -->
     <string name="ActivityLocalizationLabel">Floor plan</string>
+    <string name="StartUpdatingLocationButton">Start Updating Location</string>
 
     <!-- service_localization_ranging -->
     <string name="ServiceLocalizationRanging">Localization Service</string>
