@@ -63,9 +63,10 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private long IMU_timestamp;
 
     //For Localization service
-    private ImageView floor_plan, AP1, AP2, AP3, AP4, AP5, AP6;
-    int[] floor_plan_location = new int[2]; //241,145
+    private ImageView floor_plan, location_pin,AP1,AP2,AP3,AP4,AP5,AP6;
+    int[] floor_plan_location = new int[2];
     int[] AP_location = new int[2];
+    int[] pin_location = new int[2];
 
     //TODO try hashmap
 
@@ -111,63 +112,69 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             sensors.put("Magnetic", sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
 
             //Localization initiation
+
             floor_plan = findViewById(R.id.imageViewFloorplan);
+            location_pin = findViewById(R.id.imageViewLocationPin);
             AP1 = findViewById(R.id.imageViewAP1);
-            //AP2 = findViewById(R.id.imageViewAP2);
-            //AP3 = findViewById(R.id.imageViewAP3);
-            //AP4 = findViewById(R.id.imageViewAP4);
-            //AP5 = findViewById(R.id.imageViewAP5);
-            //AP6 = findViewById(R.id.imageViewAP6);
+            AP2 = findViewById(R.id.imageViewAP2);
+            AP3 = findViewById(R.id.imageViewAP3);
+            AP4 = findViewById(R.id.imageViewAP4);
+            AP5 = findViewById(R.id.imageViewAP5);
+            AP6 = findViewById(R.id.imageViewAP6);
 
             set_AP_pins();
             //registerSensors();
             //startRangingRequest();
             //startLoggingData();
             //startScanInBackground();
+            update_location_pin();
             Log.d(TAG,"Start localization");
         }
     }
-
-    /*
 
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             //left top coordinate
-            //floor_plan.getLocationOnScreen(floor_plan_location);
+            floor_plan.getLocationOnScreen(floor_plan_location);
+            location_pin.getLocationOnScreen(pin_location);
+            AP6.getLocationOnScreen(AP_location);
+
             //floor_plan.getLayoutParams();
-            Log.i(TAG,floor_plan_location[0]+", "+ floor_plan_location[1]);
-            Log.i(TAG,AP_location[0]+", "+AP_location[1]);
-            Log.i(TAG, "Image Width: " + floor_plan.getWidth()); //597
-            Log.i(TAG, "Image Height: " + floor_plan.getHeight()); //2151
-
-            //Top left corner of the screen display (origin) is (55,145)
-
-
+            Log.i(TAG,"Floorplan"+floor_plan_location[0]+", "+ floor_plan_location[1]);
+            Log.i(TAG,"Pin"+pin_location[0]+", "+pin_location[1]);
+            Log.i(TAG,"AP6"+AP_location[0]+", "+AP_location[1]);
+            Log.i(TAG, "Image Width: " + floor_plan.getWidth());
+            Log.i(TAG, "Image Height: " + floor_plan.getHeight());
         }
     }
 
+    /**
+     * top left corner of the screen (55,145)
+     * top left corner of the floor plan (241,145)
+     * setX = y*32.533+241, setY = x*32.533
      */
 
     private void set_AP_pins(){
-        //AP1.setLeft(241);
-        //AP1.setTop(145);
-        /*
-        AP2.setLeft(241);
-        AP2.setTop(145);
-        AP3.setLeft(241);
-        AP3.setTop(145);
-        AP4.setLeft(241);
-        AP4.setTop(145);
-        AP5.setLeft(241);
-        AP5.setTop(145);
-        AP6.setLeft(241);
-        AP6.setTop(145);
-         */
+        AP1.setX(427+241);
+        AP1.setY(1331);
+        AP2.setX(372+241);
+        AP2.setY(1134);
+        AP3.setX(372+241);
+        AP3.setY(1565);
+        AP4.setX(420+241);
+        AP4.setY(941);
+        AP5.setX(448+241);
+        AP5.setY(717);
+        AP6.setX(372+241);
+        AP6.setY(616);
     }
 
     private void update_location_pin(){
+        //TODO better coordinate system
 
+        location_pin.setX(392+241);
+        location_pin.setY(570);
     }
 
     @SuppressLint("MissingPermission")
