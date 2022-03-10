@@ -410,8 +410,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         }
     }
 
-
-
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop() LocalizationActivity");
