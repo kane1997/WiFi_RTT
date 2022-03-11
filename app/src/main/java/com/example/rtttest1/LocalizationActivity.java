@@ -63,12 +63,22 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private long IMU_timestamp;
 
     //For Localization service
-    private ImageView floor_plan, location_pin,AP1,AP2,AP3,AP4,AP5,AP6;
+    private ImageView floor_plan, location_pin,
+            AP1_ImageView, AP2_ImageView, AP3_ImageView, AP4_ImageView, AP5_ImageView, AP6_ImageView;
     int[] floor_plan_location = new int[2];
     int[] AP_location = new int[2];
     int[] pin_location = new int[2];
+    double meter2pixel = 32.5;
+    double screen_offsetX = 241;
 
     int i,j;
+
+    AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91, 13.15);
+    AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",34.86,11.45);
+    AccessPoints AP3 = new AccessPoints("b0:e4:d5:01:26:f5",48.12,11.45);
+    AccessPoints AP4 = new AccessPoints("b0:e4:d5:5f:f2:ad",28.92,12.91);
+    AccessPoints AP5 = new AccessPoints("b0:e4:d5:96:3b:95",22.04,13.80);
+    AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",18.94,11.45);
 
     //TODO try hashmap
 
@@ -117,12 +127,12 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
             floor_plan = findViewById(R.id.imageViewFloorplan);
             location_pin = findViewById(R.id.imageViewLocationPin);
-            AP1 = findViewById(R.id.imageViewAP1);
-            AP2 = findViewById(R.id.imageViewAP2);
-            AP3 = findViewById(R.id.imageViewAP3);
-            AP4 = findViewById(R.id.imageViewAP4);
-            AP5 = findViewById(R.id.imageViewAP5);
-            AP6 = findViewById(R.id.imageViewAP6);
+            AP1_ImageView = findViewById(R.id.imageViewAP1);
+            AP2_ImageView = findViewById(R.id.imageViewAP2);
+            AP3_ImageView = findViewById(R.id.imageViewAP3);
+            AP4_ImageView = findViewById(R.id.imageViewAP4);
+            AP5_ImageView = findViewById(R.id.imageViewAP5);
+            AP6_ImageView = findViewById(R.id.imageViewAP6);
 
 
             set_AP_pins();
@@ -141,7 +151,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             //left top coordinate
             floor_plan.getLocationOnScreen(floor_plan_location);
             location_pin.getLocationOnScreen(pin_location);
-            AP6.getLocationOnScreen(AP_location);
+            AP6_ImageView.getLocationOnScreen(AP_location);
 
             //floor_plan.getLayoutParams();
             Log.i(TAG,"Floorplan"+floor_plan_location[0]+", "+ floor_plan_location[1]);
@@ -160,18 +170,30 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
      */
 
     private void set_AP_pins(){
-        AP1.setX(427+241);
-        AP1.setY(1331);
-        AP2.setX(372+241);
-        AP2.setY(1134);
-        AP3.setX(372+241);
-        AP3.setY(1565);
-        AP4.setX(420+241);
-        AP4.setY(941);
-        AP5.setX(448+241);
-        AP5.setY(717);
-        AP6.setX(372+241);
-        AP6.setY(616);
+        AP1_ImageView.setX((float) (AP1.getY()*meter2pixel+screen_offsetX));
+        //AP1_ImageView.setX(427+241);
+        AP1_ImageView.setY((float) (AP1.getX()*meter2pixel));
+        //AP1_ImageView.setY(1331);
+        AP2_ImageView.setX((float) (AP2.getY()*meter2pixel+screen_offsetX));
+        //AP2_ImageView.setX(372+241);
+        AP2_ImageView.setY((float) (AP2.getX()*meter2pixel));
+        //AP2_ImageView.setY(1134);
+        AP3_ImageView.setX((float) (AP3.getY()*meter2pixel+screen_offsetX));
+        //AP3_ImageView.setX(372+241);
+        AP3_ImageView.setY((float) (AP3.getX()*meter2pixel));
+        //AP3_ImageView.setY(1565);
+        AP4_ImageView.setX((float) (AP4.getY()*meter2pixel+screen_offsetX));
+        //AP4_ImageView.setX(420+241);
+        AP4_ImageView.setY((float) (AP4.getX()*meter2pixel));
+        //AP4_ImageView.setY(941);
+        AP5_ImageView.setX((float) (AP5.getY()*meter2pixel+screen_offsetX));
+        //AP5_ImageView.setX(448+241);
+        AP5_ImageView.setY((float) (AP5.getX()*meter2pixel));
+        //AP5_ImageView.setY(717);
+        AP6_ImageView.setX((float) (AP6.getY()*meter2pixel+screen_offsetX));
+        //AP6_ImageView.setX(372+241);
+        AP6_ImageView.setY((float) (AP6.getX()*meter2pixel));
+        //AP6_ImageView.setY(616);
     }
 
 
