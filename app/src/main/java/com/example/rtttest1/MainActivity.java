@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intentPositioning);
     }
 
+    //TODO make this class a common service
     private class WifiScanReceiver extends BroadcastReceiver {
         //Only keep RTT supported APs from the original scan list
         private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">WiFi-RTT</string>
 
-    <!-- activity_main -->
+    <!-- MainActivity -->
     <string name="ScanAPS">Scan</string>
     <string name="CheckRTTAvailability">Check RTT Availability</string>
     <string name="ScanResultHint">Scan result will be displayed here.</string>
@@ -10,15 +10,15 @@
     <string name="BSSIDHeader">BSSID</string>
     <string name="StartPositioningButton">Start Positioning</string>
 
-    <!-- permission_request -->
+    <!-- LocationPermissionRequest -->
+    <string name="ActivityPermissionRequestLabel">Location permission request</string>
     <string name="GrantLocationPermission">Continue</string>
     <string name="DenyLocationPermission">No Thanks</string>
-    <string name="ActivityPermissionRequestLabel">Location Permission Request</string>
     <string name="LocationRequestDescription">This app needs access to your phone\'s
     location to show the distance between this device and the APs.</string>
 
-    <!-- activity_ranging -->
-    <string name="ActivityRangingLabel">Ranging Results</string>
+    <!-- RangingActivity -->
+    <string name="ActivityRangingLabel">Show ranging results</string>
     <string name="DelayBeforeNextRequest">RTT Ranging Delay (ms)</string>
     <string name="DelayHint">1000</string>
     <string name="LogButton">Log data</string>
@@ -39,11 +39,13 @@
     <string name="GyroscopeY">Y: %1$f</string>
     <string name="GyroscopeZ">Z: %1$f</string>
 
-    <!-- activity_localization -->
-    <string name="ActivityLocalizationLabel">Floor plan</string>
+    <!-- LocalizationActivity -->
+    <string name="ActivityLocalizationLabel">Localization based on floor plan</string>
     <string name="StartUpdatingLocationButton">Start Updating Location</string>
 
-    <!-- service_localization_ranging -->
-    <string name="ServiceLocalizationRanging">Localization Service</string>
+    <!-- activity_localization.xml -->
+    <string name="FloorPlanContentDescription">Floor plan for localization</string>
+    <string name="LocationPinContentDescription">Pin of current location</string>
+    <string name="APContentDescription">Pin of active AP</string>
 
 </resources>

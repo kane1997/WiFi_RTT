@@ -5,6 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,16 +28,13 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -43,7 +47,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     private static final String TAG = "LocalizationActivity";
 
-    //For RTT service
+    /**
+     * For RTT service
+     */
     private WifiRttManager myWifiRTTManager;
     private WifiManager myWifiManager;
     private RTTRangingResultCallback myRTTRangingResultCallback;
@@ -55,32 +61,37 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     final Handler RangingRequestDelayHandler = new Handler();
 
-    //For IMU service
+    /**
+     * For IMU service
+     */
     private SensorManager sensorManager;
     private final HashMap<String, Sensor> sensors = new HashMap<>();
-
     private float accx, accy, accz, gyrox, gyroy, gyroz, magx, magy, magz;
     private long IMU_timestamp;
 
-    //For Localization service
+    /**
+     * For Localization service
+     */
+    private Paint paint;
+    private Path path;
+    private Bitmap bitmap_floor_plan, temp_bitmap;
+    private Canvas temp_canvas;
+    
     private ImageView floor_plan, location_pin,
             AP1_ImageView, AP2_ImageView, AP3_ImageView, AP4_ImageView, AP5_ImageView, AP6_ImageView;
-    int[] floor_plan_location = new int[2];
-    int[] AP_location = new int[2];
+    //int[] floor_plan_location = new int[2];
+    //int[] AP_location = new int[2];
     int[] pin_location = new int[2];
-    double meter2pixel = 32.5;
-    double screen_offsetX = 241;
-
+    double meter2pixel = 32.5; // 1 meter <--> 32.5 pixels for THIS PARTICULAR FLOOR PLAN!
+    double screen_offsetX = 241; //in pixels
     int i,j;
 
-    AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91, 13.15);
+    AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91,13.15);
     AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",34.86,11.45);
     AccessPoints AP3 = new AccessPoints("b0:e4:d5:01:26:f5",48.12,11.45);
     AccessPoints AP4 = new AccessPoints("b0:e4:d5:5f:f2:ad",28.92,12.91);
     AccessPoints AP5 = new AccessPoints("b0:e4:d5:96:3b:95",22.04,13.80);
     AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",18.94,11.45);
-
-    //TODO try hashmap
 
     //flag for leaving the activity
     Boolean Running = true;
@@ -89,7 +100,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Log.d(TAG,"onCreate() LocalizationActivity");
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
@@ -124,7 +135,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             sensors.put("Magnetic", sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
 
             //Localization initiation
-
             floor_plan = findViewById(R.id.imageViewFloorplan);
             location_pin = findViewById(R.id.imageViewLocationPin);
             AP1_ImageView = findViewById(R.id.imageViewAP1);
@@ -133,73 +143,89 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             AP4_ImageView = findViewById(R.id.imageViewAP4);
             AP5_ImageView = findViewById(R.id.imageViewAP5);
             AP6_ImageView = findViewById(R.id.imageViewAP6);
+            bitmap_floor_plan = BitmapFactory.decodeResource(getResources(),R.drawable.floor_plan);
 
+            paint = new Paint();
+            path = new Path();
+
+            temp_bitmap = Bitmap.createBitmap(bitmap_floor_plan.getWidth(),
+                    bitmap_floor_plan.getHeight(),Bitmap.Config.RGB_565);
+            
+            temp_canvas = new Canvas(temp_bitmap);
+            temp_canvas.drawBitmap(bitmap_floor_plan,0,0,null);
+
+            paint.setAntiAlias(true);
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(10);
+            paint.setPathEffect(new DashPathEffect(new float[] {20,10,10},1));
 
             set_AP_pins();
             //registerSensors();
             //startRangingRequest();
             //startLoggingData();
             //startScanInBackground();
-            update_location_pin();
+            //update_location_pin();
             Log.d(TAG,"Start localization");
         }
     }
 
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            //left top coordinate
-            floor_plan.getLocationOnScreen(floor_plan_location);
-            location_pin.getLocationOnScreen(pin_location);
-            AP6_ImageView.getLocationOnScreen(AP_location);
-
-            //floor_plan.getLayoutParams();
-            Log.i(TAG,"Floorplan"+floor_plan_location[0]+", "+ floor_plan_location[1]);
-            Log.i(TAG,"Pin"+pin_location[0]+", "+pin_location[1]);
-            Log.i(TAG,"AP6"+AP_location[0]+", "+AP_location[1]);
-            Log.i(TAG, "Image Width: " + floor_plan.getWidth());
-            Log.i(TAG, "Image Height: " + floor_plan.getHeight());
-        }
-    }
+    /** This method is used to determine the dimension of floor plan
+     *  in aid of constructing an coordinate plane.
+     *
+     *  public void onWindowFocusChanged(boolean hasFocus) {
+     *         super.onWindowFocusChanged(hasFocus);
+     *         if (hasFocus) {
+     *             //left top coordinate
+     *             floor_plan.getLocationOnScreen(floor_plan_location);
+     *             location_pin.getLocationOnScreen(pin_location);
+     *             AP6_ImageView.getLocationOnScreen(AP_location);
+     *
+     *             //floor_plan.getLayoutParams();
+     *             Log.i(TAG,"Floorplan"+floor_plan_location[0]+", "+ floor_plan_location[1]);
+     *             Log.i(TAG,"Pin"+pin_location[0]+", "+pin_location[1]);
+     *             Log.i(TAG,"AP6"+AP_location[0]+", "+AP_location[1]);
+     *             Log.i(TAG, "Image Width: " + floor_plan.getWidth());
+     *             Log.i(TAG, "Image Height: " + floor_plan.getHeight());
+     */
 
     /**
      * top left corner of the screen (55,145)
      * top left corner of the floor plan (241,145)
      * width of floor plan (597), height of floor plan (2151)
-     * setX = y*32.533+241, setY = x*32.533
+     * setX = y*<meter2pixel>(32.533)+<screen_offsetX>(241), setY = x*<meter2pixel>(32.533)
      */
 
     private void set_AP_pins(){
+        Log.d(TAG,"set_AP_pins");
         AP1_ImageView.setX((float) (AP1.getY()*meter2pixel+screen_offsetX));
-        //AP1_ImageView.setX(427+241);
         AP1_ImageView.setY((float) (AP1.getX()*meter2pixel));
-        //AP1_ImageView.setY(1331);
         AP2_ImageView.setX((float) (AP2.getY()*meter2pixel+screen_offsetX));
-        //AP2_ImageView.setX(372+241);
         AP2_ImageView.setY((float) (AP2.getX()*meter2pixel));
-        //AP2_ImageView.setY(1134);
         AP3_ImageView.setX((float) (AP3.getY()*meter2pixel+screen_offsetX));
-        //AP3_ImageView.setX(372+241);
         AP3_ImageView.setY((float) (AP3.getX()*meter2pixel));
-        //AP3_ImageView.setY(1565);
         AP4_ImageView.setX((float) (AP4.getY()*meter2pixel+screen_offsetX));
-        //AP4_ImageView.setX(420+241);
         AP4_ImageView.setY((float) (AP4.getX()*meter2pixel));
-        //AP4_ImageView.setY(941);
         AP5_ImageView.setX((float) (AP5.getY()*meter2pixel+screen_offsetX));
-        //AP5_ImageView.setX(448+241);
         AP5_ImageView.setY((float) (AP5.getX()*meter2pixel));
-        //AP5_ImageView.setY(717);
         AP6_ImageView.setX((float) (AP6.getY()*meter2pixel+screen_offsetX));
-        //AP6_ImageView.setX(372+241);
         AP6_ImageView.setY((float) (AP6.getX()*meter2pixel));
-        //AP6_ImageView.setY(616);
+
+        path.moveTo(300,300);
+        path.lineTo(500,500);
+        temp_canvas.drawPath(path,paint);
+        floor_plan.setImageBitmap(temp_bitmap);
+
+        path.moveTo(500,500);
+        path.lineTo(800,800);
+        temp_canvas.drawPath(path,paint);
+        floor_plan.setImageBitmap(temp_bitmap);
     }
 
-
-
+    //TODO animated drawable?
     private void update_location_pin(){
-        //TODO better coordinate system
+        //TODO better coordinate system?
+        //TODO onReceive from backend
         location_pin.setX(392+241);
         location_pin.setY(570);
         i = 1500;
@@ -275,7 +301,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                         public void onResponse(@NonNull Call call, @NonNull Response response)
                                 throws IOException{
                             String result = Objects.requireNonNull(response.body()).string();
-                            //String result = response.body().string();
                             response.close();
                             Log.i("result",result);
                         }
@@ -336,7 +361,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 
-    private void startScanInBackground(){
+    private void ScanInBackground(){
         Handler BackgroundScan_Handler = new Handler();
         Runnable BackgroundScan_Runnable = new Runnable() {
             @Override

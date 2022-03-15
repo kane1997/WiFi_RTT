@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -260,7 +261,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
         });
         RTT_thread.start();
-
          */
 
         Handler LogRTT_Handler = new Handler();
@@ -349,7 +349,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response)
                             throws IOException {
-                        String result = response.body().string();
+                        String result = Objects.requireNonNull(response.body()).string();
                         response.close();
                         Log.i("result",result);
                     }
@@ -421,15 +421,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 accx = sensorEvent.values[0];
                 accy = sensorEvent.values[1];
                 accz = sensorEvent.values[2];
-                /*
                 String AccX = this.getString(R.string.AccelerometerX,accx);
                 String AccY = this.getString(R.string.AccelerometerY,accy);
                 String AccZ = this.getString(R.string.AccelerometerZ,accz);
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
-
-                 */
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
@@ -437,15 +434,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 magx = sensorEvent.values[0];
                 magy = sensorEvent.values[1];
                 magz = sensorEvent.values[2];
-                /*
                 String MagX = this.getString(R.string.Magnetic_FieldX,magx);
                 String MagY = this.getString(R.string.Magnetic_FieldY,magy);
                 String MagZ = this.getString(R.string.Magnetic_FieldZ,magz);
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
-
-                 */
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -453,15 +447,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 gyrox = sensorEvent.values[0];
                 gyroy = sensorEvent.values[1];
                 gyroz = sensorEvent.values[2];
-                /*
                 String GyroX = this.getString(R.string.GyroscopeX,gyrox);
                 String GyroY = this.getString(R.string.GyroscopeY,gyroy);
                 String GyroZ = this.getString(R.string.GyroscopeZ,gyroz);
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
-
-                 */
         }
     }
 

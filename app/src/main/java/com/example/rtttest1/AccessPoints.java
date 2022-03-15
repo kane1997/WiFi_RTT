@@ -1,25 +1,9 @@
 package com.example.rtttest1;
 
 public class AccessPoints {
-    private String BSSID;
-    private double x;
-    private double y;
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
+    private final String BSSID;
+    private final double x;
+    private final double y;
 
     //Constructor
     public AccessPoints(String BSSID, double x, double y) {
@@ -32,11 +16,11 @@ public class AccessPoints {
         return BSSID;
     }
 
-    public double[] getPosition() {
-        return new double[] {this.x,this.y};
+    public double getX() {
+        return x;
     }
 
-    public void setBSSID(String BSSID) {
-        this.BSSID = BSSID;
+    public double getY() {
+        return y;
     }
 }
