@@ -45,7 +45,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
+//TODO better layout and display?
 /**
  * Send ranging requests and display distance and RSSI values
  */
@@ -203,6 +203,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG,"onClickLogData()");
 
         EditText url_text = findViewById(R.id.editTextURL);
+        //TODO editText optimization
         String url_bit = url_text.getText().toString();
 
         //IP address of Nest Router
@@ -317,7 +318,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     public void onClickStopLog(View view){
         Log.d(TAG,"onClickStopLog");
         Running = false;
-        //TODO
+        //TODO Stopping Logging
     }
      */
 
