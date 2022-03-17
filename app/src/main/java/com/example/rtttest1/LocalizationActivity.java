@@ -74,17 +74,18 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
      */
     private Paint paint;
     private Path path;
-    private Bitmap bitmap_floor_plan, temp_bitmap;
+    private Bitmap temp_bitmap;
     private Canvas temp_canvas;
     
     private ImageView floor_plan, location_pin,
             AP1_ImageView, AP2_ImageView, AP3_ImageView, AP4_ImageView, AP5_ImageView, AP6_ImageView;
-    //int[] floor_plan_location = new int[2];
-    //int[] AP_location = new int[2];
+    int[] floor_plan_location = new int[2];
+    int[] AP_location = new int[2];
     int[] pin_location = new int[2];
     double meter2pixel = 32.5; // 1 meter <--> 32.5 pixels for THIS PARTICULAR FLOOR PLAN!
+    double bitmap2floorplan = 2.994;
     double screen_offsetX = 241; //in pixels
-    int i,j;
+    int testing_i, testing_j, path_y;
 
     AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91,13.15);
     AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",34.86,11.45);
@@ -143,7 +144,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             AP4_ImageView = findViewById(R.id.imageViewAP4);
             AP5_ImageView = findViewById(R.id.imageViewAP5);
             AP6_ImageView = findViewById(R.id.imageViewAP6);
-            bitmap_floor_plan = BitmapFactory.decodeResource(getResources(),R.drawable.floor_plan);
+            Bitmap bitmap_floor_plan = BitmapFactory.decodeResource(getResources(), R.drawable.floor_plan);
 
             paint = new Paint();
             path = new Path();
@@ -158,45 +159,53 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(10);
-            paint.setPathEffect(new DashPathEffect(new float[] {20,10,10},1));
+            paint.setPathEffect(new DashPathEffect(new float[] {20,10,10,10},1));
 
-            set_AP_pins();
+            setup_pin_location();
             //registerSensors();
             //startRangingRequest();
             //startLoggingData();
             //startScanInBackground();
-            //update_location_pin();
+            update_location_pin();
             Log.d(TAG,"Start localization");
         }
     }
 
-    /** This method is used to determine the dimension of floor plan
-     *  in aid of constructing an coordinate plane.
-     *
-     *  public void onWindowFocusChanged(boolean hasFocus) {
-     *         super.onWindowFocusChanged(hasFocus);
-     *         if (hasFocus) {
-     *             //left top coordinate
-     *             floor_plan.getLocationOnScreen(floor_plan_location);
-     *             location_pin.getLocationOnScreen(pin_location);
-     *             AP6_ImageView.getLocationOnScreen(AP_location);
-     *
-     *             //floor_plan.getLayoutParams();
-     *             Log.i(TAG,"Floorplan"+floor_plan_location[0]+", "+ floor_plan_location[1]);
-     *             Log.i(TAG,"Pin"+pin_location[0]+", "+pin_location[1]);
-     *             Log.i(TAG,"AP6"+AP_location[0]+", "+AP_location[1]);
-     *             Log.i(TAG, "Image Width: " + floor_plan.getWidth());
-     *             Log.i(TAG, "Image Height: " + floor_plan.getHeight());
-     */
-
     /**
-     * top left corner of the screen (55,145)
-     * top left corner of the floor plan (241,145)
+     * The following method is used to determine the dimension of floor plan
+     * in aid of constructing an coordinate plane.
+     */
+      public void onWindowFocusChanged(boolean hasFocus) {
+          super.onWindowFocusChanged(hasFocus);
+          if (hasFocus) {
+              //left top coordinate
+              floor_plan.getLocationOnScreen(floor_plan_location);
+              location_pin.getLocationOnScreen(pin_location);
+              AP6_ImageView.getLocationOnScreen(AP_location);
+
+              //floor_plan.getLayoutParams();
+              Log.i(TAG, "Floorplan" + floor_plan_location[0] + ", " + floor_plan_location[1]);
+              Log.i(TAG, "Pin" + pin_location[0] + ", " + pin_location[1]);
+              Log.i(TAG, "AP6" + AP_location[0] + ", " + AP_location[1]);
+              Log.i(TAG, "Image Width: " + floor_plan.getWidth());
+              Log.i(TAG, "Image Height: " + floor_plan.getHeight());
+          }
+      }
+
+    /** To calculate coordinates
+     * top left corner of the screen (55,145), top left corner of the floor plan (241,145)
+     * SetY(-26) > left edge of the floor plan
      * width of floor plan (597), height of floor plan (2151)
+     * width of bitmap (1788), height of bitmap (6438)
+     *
+     * FOR PIN LOCATION:
      * setX = y*<meter2pixel>(32.533)+<screen_offsetX>(241), setY = x*<meter2pixel>(32.533)
+     *
+     * FOR PATH EFFECT:
+     * path.moveTo/lineTo( (y*32.533*bitmap2floorplan), ((x*32.533+26)*bitmap2floorplan) )
      */
 
-    private void set_AP_pins(){
+    private void setup_pin_location(){
         Log.d(TAG,"set_AP_pins");
         AP1_ImageView.setX((float) (AP1.getY()*meter2pixel+screen_offsetX));
         AP1_ImageView.setY((float) (AP1.getX()*meter2pixel));
@@ -211,36 +220,38 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         AP6_ImageView.setX((float) (AP6.getY()*meter2pixel+screen_offsetX));
         AP6_ImageView.setY((float) (AP6.getX()*meter2pixel));
 
-        path.moveTo(300,300);
-        path.lineTo(500,500);
-        temp_canvas.drawPath(path,paint);
-        floor_plan.setImageBitmap(temp_bitmap);
-
-        path.moveTo(500,500);
-        path.lineTo(800,800);
-        temp_canvas.drawPath(path,paint);
-        floor_plan.setImageBitmap(temp_bitmap);
+        location_pin.setX((float) (392+screen_offsetX));
+        location_pin.setY(570);
     }
 
     //TODO animated drawable?
     private void update_location_pin(){
         //TODO better coordinate system?
         //TODO onReceive from backend
-        location_pin.setX(392+241);
-        location_pin.setY(570);
-        i = 1500;
-        j = 570;
+        testing_i = 1500;
+        testing_j = 570;
+        path_y = (int) ((570+26)*bitmap2floorplan);
 
         location_pin.getLocationOnScreen(pin_location);
+
         Handler Update_location_Handler = new Handler();
         Runnable Update_location_Runnable = new Runnable() {
             @Override
             public void run() {
-                if (Running && (pin_location[1] < i )){
-                    Update_location_Handler.postDelayed(this,1000);
-                    j += 50;
-                    location_pin.setY(j);
+                if (Running && (pin_location[1] < testing_i)){
+                    Update_location_Handler.postDelayed(this,500);
+
+                    path.moveTo(1174, path_y);
+                    testing_j += 20;
+                    path_y += 75;
+
+                    location_pin.setY(testing_j);
                     location_pin.getLocationOnScreen(pin_location);
+
+                    Log.d(TAG,"Current location: "+pin_location[0]+", "+pin_location[1]);
+                    path.lineTo(1174, path_y);
+                    temp_canvas.drawPath(path,paint);
+                    floor_plan.setImageBitmap(temp_bitmap);
                 } else {
                     Update_location_Handler.removeCallbacks(this);
                 }
