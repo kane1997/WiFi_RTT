@@ -67,6 +67,14 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     //IMU
     private SensorManager sensorManager;
     private final HashMap<String,Sensor> sensors = new HashMap<>();
+    public long IMU_timestamp;
+
+    private final float[] rotationMatrix = new float[9];
+    private final float[] inclinationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
+    private final float[] LastAccReading = new float[3];
+    private final float[] LastMagReading = new float[3];
+    private final float[] LastGyroReading = new float[3];
 
     //flag for leaving the activity
     Boolean Running = true;
@@ -84,9 +92,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private TextView textMagx;
     private TextView textMagy;
     private TextView textMagz;
-
-    public float accx,accy,accz,gyrox,gyroy,gyroz,magx,magy,magz;
-    public long IMU_timestamp;
 
     final Handler RangingRequestDelayHandler = new Handler();
 
@@ -322,17 +327,18 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     e.printStackTrace();
                 }
                 RequestBody IMU_Body = new FormBody.Builder()
-                        .add("Flag","IMU")
-                        .add("Timestamp",String.valueOf(IMU_timestamp))
-                        .add("accx", String.valueOf(accx))
-                        .add("accy", String.valueOf(accy))
-                        .add("accz", String.valueOf(accz))
-                        .add("gyrox", String.valueOf(gyrox))
-                        .add("gyroy", String.valueOf(gyroy))
-                        .add("gyroz", String.valueOf(gyroz))
-                        .add("magx", String.valueOf(magx))
-                        .add("magy", String.valueOf(magy))
-                        .add("magz", String.valueOf(magz))
+                        .add("Timestamp", String.valueOf(IMU_timestamp))
+                        .add("accx", String.valueOf(LastAccReading[0]))
+                        .add("accy", String.valueOf(LastAccReading[1]))
+                        .add("accz", String.valueOf(LastAccReading[2]))
+                        .add("gyrox", String.valueOf(LastGyroReading[0]))
+                        .add("gyroy", String.valueOf(LastGyroReading[1]))
+                        .add("gyroz", String.valueOf(LastGyroReading[2]))
+                        .add("magx", String.valueOf(LastMagReading[0]))
+                        .add("magy", String.valueOf(LastMagReading[1]))
+                        .add("magz", String.valueOf(LastMagReading[2]))
+                        .add("orientation", orientationAngles[0] + " " +
+                                orientationAngles[1] + " " + orientationAngles[2])
                         .build();
 
                 Request IMU_Request = new Request.Builder()
@@ -416,16 +422,17 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        final float alpha = 0.97f;
         IMU_timestamp = SystemClock.elapsedRealtime();
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.d(TAG, "Acc: "+sensorEvent.timestamp);
-                accx = sensorEvent.values[0];
-                accy = sensorEvent.values[1];
-                accz = sensorEvent.values[2];
-                String AccX = this.getString(R.string.AccelerometerX,accx);
-                String AccY = this.getString(R.string.AccelerometerY,accy);
-                String AccZ = this.getString(R.string.AccelerometerZ,accz);
+                LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
+                LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
+                LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
+                String AccX = this.getString(R.string.AccelerometerX,LastAccReading[0]);
+                String AccY = this.getString(R.string.AccelerometerY,LastAccReading[1]);
+                String AccZ = this.getString(R.string.AccelerometerZ,LastAccReading[2]);
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
@@ -433,12 +440,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
             case Sensor.TYPE_MAGNETIC_FIELD:
                 //Log.d(TAG, "Mag: "+sensorEvent.timestamp);
-                magx = sensorEvent.values[0];
-                magy = sensorEvent.values[1];
-                magz = sensorEvent.values[2];
-                String MagX = this.getString(R.string.Magnetic_FieldX,magx);
-                String MagY = this.getString(R.string.Magnetic_FieldY,magy);
-                String MagZ = this.getString(R.string.Magnetic_FieldZ,magz);
+                LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
+                LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
+                LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
+                String MagX = this.getString(R.string.Magnetic_FieldX,LastMagReading[0]);
+                String MagY = this.getString(R.string.Magnetic_FieldY,LastMagReading[1]);
+                String MagZ = this.getString(R.string.Magnetic_FieldZ,LastMagReading[2]);
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
@@ -446,16 +453,22 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
             case Sensor.TYPE_GYROSCOPE:
                 //Log.d(TAG,"Gyr: "+sensorEvent.timestamp);
-                gyrox = sensorEvent.values[0];
-                gyroy = sensorEvent.values[1];
-                gyroz = sensorEvent.values[2];
-                String GyroX = this.getString(R.string.GyroscopeX,gyrox);
-                String GyroY = this.getString(R.string.GyroscopeY,gyroy);
-                String GyroZ = this.getString(R.string.GyroscopeZ,gyroz);
+                LastGyroReading[0] = sensorEvent.values[0];
+                LastGyroReading[1] = sensorEvent.values[1];
+                LastGyroReading[2] = sensorEvent.values[2];
+                String GyroX = this.getString(R.string.GyroscopeX,LastGyroReading[0]);
+                String GyroY = this.getString(R.string.GyroscopeY,LastGyroReading[1]);
+                String GyroZ = this.getString(R.string.GyroscopeZ,LastGyroReading[2]);
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
         }
+
+        // Rotation matrix based on current readings from accelerometer and magnetometer.
+        SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix,
+                LastAccReading, LastMagReading);
+        // Express the updated rotation matrix as three orientation angles.
+        SensorManager.getOrientation(rotationMatrix, orientationAngles);
     }
 
     @Override
