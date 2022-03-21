@@ -46,6 +46,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+//TODO put common class in service?
+
 /**
  * Send ranging requests and display distance and RSSI values
  */

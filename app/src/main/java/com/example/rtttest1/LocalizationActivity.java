@@ -163,9 +163,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
             setup_pin_location();
             //registerSensors();
-            //startRangingRequest();
-            //startLoggingData();
-            //startScanInBackground();
+            startRangingRequest();
+            startLoggingData();
+            ScanInBackground();
             update_location_pin();
             Log.d(TAG,"Start localization");
         }
@@ -202,7 +202,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
      * setX = y*<meter2pixel>(32.533)+<screen_offsetX>(241), setY = x*<meter2pixel>(32.533)
      *
      * FOR PATH EFFECT:
-     * path.moveTo/lineTo( (y*32.533*bitmap2floorplan), ((x*32.533+26)*bitmap2floorplan) )
+     * path.moveTo/lineTo( (y*32.533*bitmap2floorplan / Pin_y*bitmap2floorplan), ((x*32.533+26)*bitmap2floorplan) )
      */
 
     private void setup_pin_location(){
@@ -239,11 +239,11 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             @Override
             public void run() {
                 if (Running && (pin_location[1] < testing_i)){
-                    Update_location_Handler.postDelayed(this,500);
+                    Update_location_Handler.postDelayed(this,1000);
 
                     path.moveTo(1174, path_y);
                     testing_j += 20;
-                    path_y += 75;
+                    path_y += 59.88;
 
                     location_pin.setY(testing_j);
                     location_pin.getLocationOnScreen(pin_location);
@@ -272,7 +272,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private void startLoggingData(){
         Log.d(TAG,"StartLoggingData() LocalizationActivity");
 
-        String url = "http://192.168.86.47:5000/server";
+        String url = "http://192.168.86.52:5000/server";
         final OkHttpClient client = new OkHttpClient();
 
         Handler LogRTT_Handler = new Handler();
