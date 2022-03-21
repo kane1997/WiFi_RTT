@@ -329,17 +329,17 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 if (Running) {
                     LogIMU_Handler.postDelayed(this,50);
                     RequestBody IMU_Body = new FormBody.Builder()
-                            .add("Flag","IMU")
-                            .add("Timestamp",String.valueOf(IMU_timestamp))
-                            .add("accx", String.valueOf(accx))
-                            .add("accy", String.valueOf(accy))
-                            .add("accz", String.valueOf(accz))
-                            .add("gyrox", String.valueOf(gyrox))
-                            .add("gyroy", String.valueOf(gyroy))
-                            .add("gyroz", String.valueOf(gyroz))
-                            .add("magx", String.valueOf(magx))
-                            .add("magy", String.valueOf(magy))
-                            .add("magz", String.valueOf(magz))
+                            .add("Flag", "IMU")
+                            .add("Timestamp", String.valueOf(IMU_timestamp))
+                            .add("Accx", String.valueOf(accx))
+                            .add("Accy", String.valueOf(accy))
+                            .add("Accz", String.valueOf(accz))
+                            .add("Gyrox", String.valueOf(gyrox))
+                            .add("Gyroy", String.valueOf(gyroy))
+                            .add("Gyroz", String.valueOf(gyroz))
+                            .add("Azimuth", String.valueOf(orientationAngles[0]))
+                            .add("Pitch", String.valueOf(orientationAngles[1]))
+                            .add("Roll", String.valueOf(orientationAngles[2]))
                             .build();
 
                     Request IMU_Request = new Request.Builder()
