@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.net.wifi.rtt.RangingRequest;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -95,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
             } else{
                 Log.d(TAG,"No RTT APs available");
             }
+            //TODO Handle getmaxpeers (10)
+            //Log.d(TAG, String.valueOf(RangingRequest.getMaxPeers()));
         }
     }
 

@@ -327,18 +327,20 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     e.printStackTrace();
                 }
                 RequestBody IMU_Body = new FormBody.Builder()
+                        .add("Flag","IMU")
                         .add("Timestamp", String.valueOf(IMU_timestamp))
-                        .add("accx", String.valueOf(LastAccReading[0]))
-                        .add("accy", String.valueOf(LastAccReading[1]))
-                        .add("accz", String.valueOf(LastAccReading[2]))
-                        .add("gyrox", String.valueOf(LastGyroReading[0]))
-                        .add("gyroy", String.valueOf(LastGyroReading[1]))
-                        .add("gyroz", String.valueOf(LastGyroReading[2]))
-                        .add("magx", String.valueOf(LastMagReading[0]))
-                        .add("magy", String.valueOf(LastMagReading[1]))
-                        .add("magz", String.valueOf(LastMagReading[2]))
-                        .add("orientation", orientationAngles[0] + " " +
-                                orientationAngles[1] + " " + orientationAngles[2])
+                        .add("Accx", String.valueOf(LastAccReading[0]))
+                        .add("Accy", String.valueOf(LastAccReading[1]))
+                        .add("Accz", String.valueOf(LastAccReading[2]))
+                        .add("Gyrox", String.valueOf(LastGyroReading[0]))
+                        .add("Gyroy", String.valueOf(LastGyroReading[1]))
+                        .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                        .add("Magx", String.valueOf(LastMagReading[0]))
+                        .add("Magy", String.valueOf(LastMagReading[1]))
+                        .add("Magz", String.valueOf(LastMagReading[2]))
+                        .add("Azimuth",String.valueOf(orientationAngles[0]))
+                        .add("Pitch",String.valueOf(orientationAngles[1]))
+                        .add("Roll",String.valueOf(orientationAngles[2]))
                         .build();
 
                 Request IMU_Request = new Request.Builder()
