@@ -47,6 +47,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 //TODO put common class in service?
+//TODO Try different layout view(linear?)
+
 
 /**
  * Send ranging requests and display distance and RSSI values
@@ -75,6 +77,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private final float[] LastAccReading = new float[3];
     private final float[] LastMagReading = new float[3];
     private final float[] LastGyroReading = new float[3];
+
+    int Acc_Flag, Mag_Flag, Gyro_Flag = 0;
+
+    long Acc_reference_time, Mag_reference_time, Gyro_reference_time,
+            Acc_current_time, Mag_current_time, Gyro_current_time;
 
     //flag for leaving the activity
     Boolean Running = true;
@@ -148,9 +155,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
+            sensors.put("Magnetic",sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
             sensors.put("Accelerometer",sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
             sensors.put("Gyroscope",sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
-            sensors.put("Magnetic",sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
             registerSensors();
 
             startRangingRequest();
@@ -185,7 +192,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         }else{
             Snackbar.make(findViewById(R.id.textViewDelayBeforeNextRequest),
                     "Please enter a valid number",Snackbar.LENGTH_SHORT).show();
-            //TODO edit
+            //TODO edit snackbar
         }
     }
 
@@ -214,9 +221,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
 
         //IP address of Nest Router
-        String url = "http://192.168.86.34:5000/server";
+        String url = "http://192.168.86.52:5000/server";
+        //TODO smart url input
 
         final OkHttpClient client = new OkHttpClient();
+
+        //TODO will AsyncTask/Thread/Queue work better?
 
         /*
         Thread RTT_thread = new Thread(() -> {
@@ -310,9 +320,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         }
 
                         @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        public void onResponse(@NonNull Call call, @NonNull Response response)
+                                throws IOException {
+                            String result = Objects.requireNonNull(response.body()).string();
                             response.close();
-                            Log.i("result",String.valueOf(response.body()));
+                            Log.i("result",result);
                         }
                     });
                 }
@@ -420,50 +432,82 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 
-
-
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         final float alpha = 0.97f;
-        IMU_timestamp = SystemClock.elapsedRealtime();
+        IMU_timestamp = SystemClock.elapsedRealtimeNanos();
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
-                //Log.d(TAG, "Acc: "+sensorEvent.timestamp);
+                if (Acc_Flag == 0) {
+                    Acc_Flag += 1;
+                    //Acc_reference_time = sensorEvent.timestamp;
+                    Acc_reference_time = SystemClock.elapsedRealtimeNanos();
+                }
+
+                //Acc_current_time = sensorEvent.timestamp - Acc_reference_time;
+                Acc_current_time = SystemClock.elapsedRealtimeNanos() - Acc_reference_time;
+                //Log.d(TAG,"ACC: "+Acc_current_time);
+
                 LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
+                /*
                 String AccX = this.getString(R.string.AccelerometerX,LastAccReading[0]);
                 String AccY = this.getString(R.string.AccelerometerY,LastAccReading[1]);
                 String AccZ = this.getString(R.string.AccelerometerZ,LastAccReading[2]);
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
+
+                 */
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
-                //Log.d(TAG, "Mag: "+sensorEvent.timestamp);
+                if (Mag_Flag == 0) {
+                    Mag_Flag += 1;
+                    //Mag_reference_time = sensorEvent.timestamp;
+                    Mag_reference_time = SystemClock.elapsedRealtimeNanos();
+                }
+                //Mag_current_time = sensorEvent.timestamp - Mag_reference_time;
+                Mag_current_time = SystemClock.elapsedRealtimeNanos() - Mag_reference_time;
+                //Log.d(TAG, "MAG: "+ Mag_current_time);
+
                 LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
+                /*
                 String MagX = this.getString(R.string.Magnetic_FieldX,LastMagReading[0]);
                 String MagY = this.getString(R.string.Magnetic_FieldY,LastMagReading[1]);
                 String MagZ = this.getString(R.string.Magnetic_FieldZ,LastMagReading[2]);
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
+
+                 */
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
-                //Log.d(TAG,"Gyr: "+sensorEvent.timestamp);
+                if (Gyro_Flag == 0) {
+                    Gyro_Flag += 1;
+                    //Gyro_reference_time = sensorEvent.timestamp;
+                    Gyro_reference_time = SystemClock.elapsedRealtimeNanos();
+                }
+                //Gyro_current_time = sensorEvent.timestamp - Gyro_reference_time;
+                Gyro_current_time = SystemClock.elapsedRealtimeNanos() - Gyro_reference_time;
+                //Log.d(TAG,"GYRO: "+ Gyro_current_time);
+
                 LastGyroReading[0] = sensorEvent.values[0];
                 LastGyroReading[1] = sensorEvent.values[1];
                 LastGyroReading[2] = sensorEvent.values[2];
+                /*
                 String GyroX = this.getString(R.string.GyroscopeX,LastGyroReading[0]);
                 String GyroY = this.getString(R.string.GyroscopeY,LastGyroReading[1]);
                 String GyroZ = this.getString(R.string.GyroscopeZ,LastGyroReading[2]);
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
+
+                 */
         }
 
         // Rotation matrix based on current readings from accelerometer and magnetometer.
@@ -475,6 +519,22 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
+        switch (i) {
+            case -1:
+                Log.d(TAG,"No Contact");
+                break;
+            case 0:
+                Log.d(TAG,"Unreliable");
+                break;
+            case 1:
+                Log.d(TAG,"Low Accuracy");
+                break;
+            case 2:
+                Log.d(TAG,"Medium Accuracy");
+                break;
+            case 3:
+                Log.d(TAG,"High Accuracy");
+        }
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
@@ -516,7 +576,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            Log.d(TAG, list.toString());
+            //Log.d(TAG, list.toString());
 
             //Only keep valid ranging results
             List<RangingResult> status0_list = new ArrayList<>();

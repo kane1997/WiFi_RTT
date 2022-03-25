@@ -31,7 +31,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +44,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
 
 public class LocalizationActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -93,6 +98,10 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     double screen_offsetX = 241; //in pixels
     int testing_i, testing_j, path_y;
 
+    String RTT_response;
+    String temp;
+    private String[] parts = new String[2];
+
     AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91,13.15);
     AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",34.86,11.45);
     AccessPoints AP3 = new AccessPoints("b0:e4:d5:01:26:f5",48.12,11.45);
@@ -101,7 +110,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",18.94,11.45);
 
     //flag for leaving the activity
-    Boolean Running = true;
+    Boolean Running = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -168,7 +177,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             paint.setPathEffect(new DashPathEffect(new float[] {20,10,10,10},1));
 
             setup_pin_location();
-            //registerSensors();
+            registerSensors();
             startRangingRequest();
             startLoggingData();
             ScanInBackground();
@@ -234,6 +243,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private void update_location_pin(){
         //TODO better coordinate system?
         //TODO onReceive from backend
+
+        /*
         testing_i = 1500;
         testing_j = 570;
         path_y = (int) ((570+26)*bitmap2floorplan);
@@ -264,6 +275,36 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             }
         };
         Update_location_Handler.postDelayed(Update_location_Runnable,1000);
+
+         */
+        Handler Update_Location_Handler = new Handler();
+        Runnable Update_Location_Runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (Running) {
+                    Update_Location_Handler.postDelayed(this,1000);
+                    Log.d(TAG, Arrays.toString(parts));
+                    Log.d(TAG,String.valueOf(parts[0]));
+                    Log.d(TAG,String.valueOf(parts[1]));
+                    //String[] parts = RTT_response.split(" ");
+                    //TODO & or &&
+                    if (parts[0] != null & parts[1] != null) {
+                        Log.d(TAG,"1");
+                        location_pin.setX((float) (Float.parseFloat(parts[1]) *meter2pixel+screen_offsetX));
+                        location_pin.setY((float) (Float.parseFloat(parts[0])*meter2pixel));
+                    }
+                    //float tempX = Float.parseFloat(parts[0]);
+                    //location_pin.setX((int) parts[1] *meter2pixel+screen_offsetX));
+                    //location_pin.setY((float) (Float.parseFloat(parts[0])*meter2pixel));
+
+                    //Log.d(TAG,String.valueOf(RTT_response));
+                } else {
+                    Update_Location_Handler.removeCallbacks(this);
+                }
+            }
+        };
+        Update_Location_Handler.postDelayed(Update_Location_Runnable,1000);
+
     }
 
     @SuppressLint("MissingPermission")
@@ -316,10 +357,33 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response)
-                                throws IOException{
-                            String result = Objects.requireNonNull(response.body()).string();
+                                throws IOException {
+                            /*
+                            ResponseBody responseBody = response.body();
+                            BufferedSource source = responseBody.source();
+                            source.request(Long.MAX_VALUE); //request the entire body
+                            Buffer buffer = source.buffer();
+                            //clone buffer before reading from it
+                            RTT_response = buffer.clone().readString(Charset.forName("UTF-8"));
+
+                             */
+                            RTT_response = response.body().string();
                             response.close();
-                            Log.i("result",result);
+                            //String RTT_response = response.peekBody(Long.MAX_VALUE).string();
+                            parts = RTT_response.split(" ");
+                            //TODO IOE exception
+                            //location_pin.setX((float) (Float.parseFloat(parts[1])*meter2pixel+screen_offsetX));
+                            //location_pin.setY((float) (Float.parseFloat(parts[0])*meter2pixel));
+                            //Log.i("result", RTT_response);
+                            //Log.i("result2",RTT_response);
+                            //Log.d(TAG,parts[0]+","+parts[1]);
+
+                            /*
+                            parts = result.split(" ");
+                            Log.d(TAG,String.valueOf(parts[0]));
+                            Log.d(TAG,String.valueOf(parts[1]));
+
+                             */
                         }
                     });
                 } else {
@@ -366,9 +430,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response)
                                 throws IOException{
-                            String result = Objects.requireNonNull(response.body()).string();
+                            String IMU_response = Objects.requireNonNull(response.body()).string();
                             response.close();
-                            Log.i("result",result);
+                            //Log.i("result",IMU_response);
                         }
                     });
                 } else {
@@ -417,7 +481,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         IMU_timestamp = SystemClock.elapsedRealtime();
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
-                Log.d(TAG,"TYPE_ACCELEROMETER: "+sensorEvent.timestamp);
+                //Log.d(TAG,"TYPE_ACCELEROMETER: "+sensorEvent.timestamp);
                 //System.arraycopy(sensorEvent.values,0,LastAccReading,0,sensorEvent.values.length);
                 LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
@@ -425,7 +489,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
-                Log.d(TAG,"TYPE_MAGNETIC_FIELD: "+sensorEvent.timestamp);
+                //Log.d(TAG,"TYPE_MAGNETIC_FIELD: "+sensorEvent.timestamp);
                 //System.arraycopy(sensorEvent.values,0,LastMagReading,0,sensorEvent.values.length);
                 LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
@@ -433,7 +497,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
-                Log.d(TAG,"TYPE_GYROSCOPE: "+sensorEvent.timestamp);
+                //Log.d(TAG,"TYPE_GYROSCOPE: "+sensorEvent.timestamp);
                 LastGyroReading[0] = sensorEvent.values[0];
                 LastGyroReading[1] = sensorEvent.values[1];
                 LastGyroReading[2] = sensorEvent.values[2];
@@ -466,6 +530,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         }
     }
 
+    //TODO merge this class to all RangingActivity
     private class WifiScanReceiver extends BroadcastReceiver {
 
         @Override
@@ -474,15 +539,15 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 if (scanResult.is80211mcResponder()) {
                     if (!APs_MacAddress.contains(scanResult.BSSID)) {
                         RTT_APs.add(scanResult);
+                        Log.d(TAG, String.valueOf(RTT_APs));
+                        //TODO getmaxpeer
                     }
                 }
             }
-
-
-
         }
     }
 
+    //TODO merge this class to all RangingActivity
     private class RTTRangingResultCallback extends RangingResultCallback {
 
         //Start next request
@@ -514,13 +579,14 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         Log.d(TAG, "onStop() LocalizationActivity");
         super.onStop();
         unregisterSensors();
-        unregisterReceiver(myWifiScanReceiver);
+        //unregisterReceiver(myWifiScanReceiver);
         Running = false;
     }
 
     protected void onResume() {
         Log.d(TAG,"onResume() LocalizationActivity");
         super.onResume();
+        registerSensors();
         Running = true;
     }
 }
