@@ -48,8 +48,6 @@ import okhttp3.Response;
 
 //TODO put common class in service?
 //TODO Try different layout view(linear?)
-
-
 /**
  * Send ranging requests and display distance and RSSI values
  */
@@ -59,16 +57,19 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     //RTT
     private WifiRttManager myWifiRTTManager;
     private RTTRangingResultCallback myRTTResultCallback;
-    private RangingActivityAdapter rangingActivityAdapter;
     private WifiManager myWifiManager;
 
-    List<ScanResult> RTT_APs = new ArrayList<>();
-    List<RangingResult> Ranging_Result = new ArrayList<>();
-    //List<String> RangingInfo = new ArrayList<>();
+    private List<ScanResult> RTT_APs = new ArrayList<>();
+    private final List<RangingResult> Ranging_Results = new ArrayList<>();
+    private final List<String> APs_MacAddress = new ArrayList<>();
+
+    final Handler RangingRequestDelayHandler = new Handler();
 
     //IMU
     private SensorManager sensorManager;
+
     private final HashMap<String,Sensor> sensors = new HashMap<>();
+
     public long IMU_timestamp;
 
     private final float[] rotationMatrix = new float[9];
@@ -83,8 +84,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     long Acc_reference_time, Mag_reference_time, Gyro_reference_time,
             Acc_current_time, Mag_current_time, Gyro_current_time;
 
-    //flag for leaving the activity
-    Boolean Running = true;
+    private Boolean Running = true;
+
+    //Ranging layout
 
     private EditText RangingDelayEditText;
     private static final int RangingDelayDefault = 100;
@@ -100,11 +102,10 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private TextView textMagy;
     private TextView textMagz;
 
-    final Handler RangingRequestDelayHandler = new Handler();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate RangingActivity");
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
@@ -118,11 +119,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             finish();
         } else {
             setContentView(R.layout.activity_ranging);
-            Log.d(TAG, "RTT_APs passed to RangingActivity.java \n" + RTT_APs);
 
             RecyclerView myRecyclerView = findViewById(R.id.recyclerViewResults);
             myRecyclerView.setHasFixedSize(true);
-
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             myRecyclerView.setLayoutManager((layoutManager));
 
@@ -134,12 +133,16 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             myWifiRTTManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
             myRTTResultCallback = new RTTRangingResultCallback();
             myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            WifiScanReceiver myWifiReceiver = new WifiScanReceiver();
 
+            WifiScanReceiver myWifiReceiver = new WifiScanReceiver();
             registerReceiver(myWifiReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-            rangingActivityAdapter = new RangingActivityAdapter(Ranging_Result);
+            for (ScanResult AP:RTT_APs){
+                APs_MacAddress.add(AP.BSSID);
+            }
+
+            RangingActivityAdapter rangingActivityAdapter = new RangingActivityAdapter(Ranging_Results);
             myRecyclerView.setAdapter(rangingActivityAdapter);
 
             //IMU
@@ -158,20 +161,21 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             sensors.put("Magnetic",sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
             sensors.put("Accelerometer",sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
             sensors.put("Gyroscope",sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
-            registerSensors();
 
+            //Start
+            registerSensors();
             startRangingRequest();
         }
     }
 
-    public void registerSensors(){
+    private void registerSensors(){
         for (Sensor eachSensor:sensors.values()){
             sensorManager.registerListener(this,
                     eachSensor,SensorManager.SENSOR_DELAY_FASTEST);
         }
     }
 
-    public void unregisterSensors(){
+    private void unregisterSensors(){
         for (Sensor eachSensor:sensors.values()){
             sensorManager.unregisterListener(this,eachSensor);
         }
@@ -179,12 +183,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     @SuppressLint("MissingPermission")
     private void startRangingRequest() {
-
         RangingRequest rangingRequest =
                 new RangingRequest.Builder().addAccessPoints(RTT_APs).build();
 
         myWifiRTTManager.startRanging(
-                rangingRequest,getApplication().getMainExecutor(),myRTTResultCallback);
+                rangingRequest, getApplication().getMainExecutor(), myRTTResultCallback);
 
         String delay = RangingDelayEditText.getText().toString();
         if (!delay.equals("")){
@@ -197,7 +200,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     public void onClickBackgroundScan(View view){
-        Log.d(TAG,"BackgroundScan");
         Snackbar.make(view,"Start scanning in background",Snackbar.LENGTH_SHORT).show();
         Handler Update_Handler = new Handler();
         Runnable Update_Runnable = new Runnable() {
@@ -217,7 +219,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     public void onClickLogData(View view){
-        Log.d(TAG,"onClickLogData()");
         Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
 
         //IP address of Nest Router
@@ -279,7 +280,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         });
         RTT_thread.start();
          */
-
         Handler LogRTT_Handler = new Handler();
         Runnable LogRTT_Runnable = new Runnable() {
             @Override
@@ -287,13 +287,11 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 if (!Running){
                     LogRTT_Handler.removeCallbacks(this);
                 } else{
-                    //RangingInfo.clear();
                     //rate of RTT packet sending(optimal is 200)
                     LogRTT_Handler.postDelayed(this,200);
 
                     List<String> RangingInfo = new ArrayList<>();
-
-                    for (RangingResult rangingResult: Ranging_Result){
+                    for (RangingResult rangingResult: Ranging_Results){
                         RangingInfo.add(String.valueOf(rangingResult.getMacAddress()));
                         RangingInfo.add(String.valueOf(rangingResult.getDistanceMm()));
                         RangingInfo.add(String.valueOf(rangingResult.getDistanceStdDevMm()));
@@ -312,7 +310,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                             .build();
 
                     final Call call = client.newCall(RTT_request);
-
                     call.enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -361,7 +358,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         .build();
 
                 final Call call = client.newCall(IMU_Request);
-
                 call.enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -436,6 +432,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     public void onSensorChanged(SensorEvent sensorEvent) {
         final float alpha = 0.97f;
         IMU_timestamp = SystemClock.elapsedRealtimeNanos();
+
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 if (Acc_Flag == 0) {
@@ -447,7 +444,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 //Acc_current_time = sensorEvent.timestamp - Acc_reference_time;
                 Acc_current_time = SystemClock.elapsedRealtimeNanos() - Acc_reference_time;
                 //Log.d(TAG,"ACC: "+Acc_current_time);
-
                 LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
@@ -458,7 +454,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
-
                  */
                 break;
 
@@ -471,7 +466,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 //Mag_current_time = sensorEvent.timestamp - Mag_reference_time;
                 Mag_current_time = SystemClock.elapsedRealtimeNanos() - Mag_reference_time;
                 //Log.d(TAG, "MAG: "+ Mag_current_time);
-
                 LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
@@ -482,7 +476,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
-
                  */
                 break;
 
@@ -495,7 +488,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 //Gyro_current_time = sensorEvent.timestamp - Gyro_reference_time;
                 Gyro_current_time = SystemClock.elapsedRealtimeNanos() - Gyro_reference_time;
                 //Log.d(TAG,"GYRO: "+ Gyro_current_time);
-
                 LastGyroReading[0] = sensorEvent.values[0];
                 LastGyroReading[1] = sensorEvent.values[1];
                 LastGyroReading[2] = sensorEvent.values[2];
@@ -506,7 +498,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
-
                  */
         }
 
@@ -538,23 +529,19 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
-
-        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList){
-            List<ScanResult> new_list = new ArrayList<>();
-            for (ScanResult scanResult:OriginalList){
-                if (scanResult.is80211mcResponder()){
-                    new_list.add(scanResult);
-                }
-            }
-            return new_list;
-        }
-
         @Override
         public void onReceive(Context context, Intent intent) {
-            Snackbar.make(findViewById(R.id.btnBackgroundScan),
-                    "AP list updated",Snackbar.LENGTH_SHORT).show();
-            RTT_APs = findRTTAPs(myWifiManager.getScanResults());
-            Log.d(TAG,"Received and updated AP list(" + RTT_APs.size() + "): " + RTT_APs);
+            for (ScanResult scanResult:myWifiManager.getScanResults()){
+                if (scanResult.is80211mcResponder()) {
+                    if (!APs_MacAddress.contains(scanResult.BSSID)) {
+                        RTT_APs.add(scanResult);
+                        Log.d(TAG,"APs_MacAddress: "+APs_MacAddress);
+                        Log.d(TAG, "RTT_APs: "+RTT_APs);
+                        //TODO Handler getmaxpeers
+                    }
+                }
+            }
+            Log.d(TAG,"New AP list(" + RTT_APs.size() + "): " + RTT_APs);
         }
     }
 
@@ -576,20 +563,14 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            //Log.d(TAG, list.toString());
 
-            //Only keep valid ranging results
-            List<RangingResult> status0_list = new ArrayList<>();
-            for (RangingResult r:list){
-                if (r.getStatus() == 0){
-                    status0_list.add(r);
+            Ranging_Results.clear();
+            for (RangingResult result:list) {
+                if (result.getStatus() == 0){
+                    Ranging_Results.add(result);
                 }
             }
-
-            if (Running){
-                if (!status0_list.isEmpty()){
-                    rangingActivityAdapter.swapData(status0_list);
-                }
+            if (Running) {
                 queueNextRangingRequest();
             }
         }
