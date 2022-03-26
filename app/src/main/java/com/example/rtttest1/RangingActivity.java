@@ -534,6 +534,26 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
+
+        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
+            List<ScanResult> RTT_APs = new ArrayList<>();
+
+            for (ScanResult scanResult : OriginalList) {
+                if (scanResult.is80211mcResponder()) {
+                    RTT_APs.add(scanResult);
+                }
+            }
+            return RTT_APs;
+        }
+
+        //Add to avoid permission check for each scan
+        @SuppressLint("MissingPermission")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            List<ScanResult> scanResults = myWifiManager.getScanResults();
+            RTT_APs = findRTTAPs(scanResults);
+        }
+        /*
         @Override
         public void onReceive(Context context, Intent intent) {
             for (ScanResult scanResult:myWifiManager.getScanResults()){
@@ -548,6 +568,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
             Log.d(TAG,"New AP list(" + RTT_APs.size() + "): " + RTT_APs);
         }
+
+         */
     }
 
     private class RTTRangingResultCallback extends RangingResultCallback {
@@ -586,7 +608,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG, "onStop() RangingActivity");
         super.onStop();
         unregisterSensors();
-        unregisterReceiver(myWifiScanReceiver);
+        //unregisterReceiver(myWifiScanReceiver);
         Running = false;
     }
 
@@ -594,8 +616,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG,"onResume() RangingActivity");
         super.onResume();
         registerSensors();
-        registerReceiver(myWifiScanReceiver,
-                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        //registerReceiver(myWifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         Running = true;
     }
 }

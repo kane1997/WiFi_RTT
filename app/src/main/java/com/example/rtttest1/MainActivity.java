@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private boolean LocationPermission = false;
 
-    private ArrayList<ScanResult> AP_list_support_RTT;
+    ArrayList<ScanResult> AP_list_support_RTT;
 
     public WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
@@ -63,8 +63,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class WifiScanReceiver extends BroadcastReceiver {
-        private static final String TAG = "WifiScanReceiver";
+        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
+            List<ScanResult> RTT_APs = new ArrayList<>();
 
+            for (ScanResult scanResult : OriginalList) {
+                if (scanResult.is80211mcResponder()) {
+                    RTT_APs.add(scanResult);
+                }
+            }
+            return RTT_APs;
+        }
+
+        //Add to avoid permission check for each scan
+        @SuppressLint("MissingPermission")
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive() MainActivity");
+
+            List<ScanResult> scanResults = myWifiManager.getScanResults();
+            AP_list_support_RTT = (ArrayList<ScanResult>) findRTTAPs(scanResults);
+            Log.d(TAG, "All WiFi points: " + scanResults);
+            Log.d(TAG, "RTT APs: " + AP_list_support_RTT);
+
+            if (!AP_list_support_RTT.isEmpty()){
+                mainActivityAdapter.swapData(AP_list_support_RTT);
+
+            } else{
+                Log.d(TAG,"No RTT APs available");
+            }
+        }
+        /*
         //avoid permission check for each scan
         @SuppressLint("MissingPermission")
         @Override
@@ -82,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
             }
             //TODO Handle getmaxpeers (10)
         }
+
+         */
     }
 
     //Scan surrounding WiFi points
