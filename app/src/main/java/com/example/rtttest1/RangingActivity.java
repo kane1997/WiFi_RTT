@@ -59,9 +59,10 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private RTTRangingResultCallback myRTTResultCallback;
     private WifiManager myWifiManager;
     private WifiScanReceiver myWifiScanReceiver;
+    private RangingActivityAdapter rangingActivityAdapter;
 
-    private List<ScanResult> RTT_APs = new ArrayList<>();
-    private final List<RangingResult> Ranging_Results = new ArrayList<>();
+    List<ScanResult> RTT_APs = new ArrayList<>();
+    List<RangingResult> Ranging_Results = new ArrayList<>();
     private final List<String> APs_MacAddress = new ArrayList<>();
 
     final Handler RangingRequestDelayHandler = new Handler();
@@ -106,7 +107,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"onCreate RangingActivity");
+        Log.d(TAG,"onCreate() RangingActivity");
 
         //receive RTT_APs from main activity
         Intent intent = getIntent();
@@ -135,15 +136,15 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             myRTTResultCallback = new RTTRangingResultCallback();
             myWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
-            WifiScanReceiver myWifiReceiver = new WifiScanReceiver();
-            registerReceiver(myWifiReceiver,
+            myWifiScanReceiver = new WifiScanReceiver();
+            registerReceiver(myWifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
             for (ScanResult AP:RTT_APs){
                 APs_MacAddress.add(AP.BSSID);
             }
 
-            RangingActivityAdapter rangingActivityAdapter = new RangingActivityAdapter(Ranging_Results);
+            rangingActivityAdapter = new RangingActivityAdapter(Ranging_Results);
             myRecyclerView.setAdapter(rangingActivityAdapter);
 
             //IMU
@@ -221,8 +222,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     public void onClickLogData(View view){
         Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
-        EditText url_text = findViewById(R.id.editTextServer);
 
+        EditText url_text = findViewById(R.id.editTextServer);
         String url_bit = url_text.getText().toString();
 
         //IP address of Nest Router
@@ -534,24 +535,23 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
-
-        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
-            List<ScanResult> RTT_APs = new ArrayList<>();
-
-            for (ScanResult scanResult : OriginalList) {
-                if (scanResult.is80211mcResponder()) {
-                    RTT_APs.add(scanResult);
+        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList){
+            List<ScanResult> new_list = new ArrayList<>();
+            for (ScanResult scanResult:OriginalList){
+                if (scanResult.is80211mcResponder()){
+                    new_list.add(scanResult);
                 }
             }
-            return RTT_APs;
+            return new_list;
         }
 
-        //Add to avoid permission check for each scan
-        @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
+            Snackbar.make(findViewById(R.id.btnBackgroundScan),
+                    "APs Updated",Snackbar.LENGTH_SHORT).show();
             List<ScanResult> scanResults = myWifiManager.getScanResults();
             RTT_APs = findRTTAPs(scanResults);
+            Log.d(TAG,"Received and updated AP list(" + RTT_APs.size() + "): " + RTT_APs);
         }
         /*
         @Override
@@ -568,7 +568,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
             Log.d(TAG,"New AP list(" + RTT_APs.size() + "): " + RTT_APs);
         }
-
          */
     }
 
@@ -590,7 +589,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-
             Ranging_Results.clear();
             for (RangingResult result:list) {
                 if (result.getStatus() == 0){
@@ -598,6 +596,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 }
             }
             if (Running) {
+                Log.d(TAG, Ranging_Results.size()+String.valueOf(Ranging_Results));
+                rangingActivityAdapter.swapData(Ranging_Results);
                 queueNextRangingRequest();
             }
         }
@@ -608,7 +608,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG, "onStop() RangingActivity");
         super.onStop();
         unregisterSensors();
-        //unregisterReceiver(myWifiScanReceiver);
+        unregisterReceiver(myWifiScanReceiver);
         Running = false;
     }
 
