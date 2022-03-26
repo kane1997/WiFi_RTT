@@ -56,6 +56,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private WifiRttManager myWifiRTTManager;
     private WifiManager myWifiManager;
     private RTTRangingResultCallback myRTTRangingResultCallback;
+    private WifiScanReceiver myWifiScanReceiver;
 
     private List<ScanResult> RTT_APs = new ArrayList<>();
     private final List<RangingResult> Ranging_Results = new ArrayList<>();

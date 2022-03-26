@@ -58,6 +58,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private WifiRttManager myWifiRTTManager;
     private RTTRangingResultCallback myRTTResultCallback;
     private WifiManager myWifiManager;
+    private WifiScanReceiver myWifiScanReceiver;
 
     private List<ScanResult> RTT_APs = new ArrayList<>();
     private final List<RangingResult> Ranging_Results = new ArrayList<>();

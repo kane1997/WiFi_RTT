@@ -192,18 +192,19 @@
         app:layout_constraintEnd_toStartOf="@+id/btnBackgroundScan"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewDelayBeforeNextRequest" />
-<!--
-    <EditText
-        android:id="@+id/editTextURL"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:ems="10"
-        android:hint="@string/URLeditText"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/delayValue"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-        -->
+
+    <!--
+        <EditText
+            android:id="@+id/editTextURL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:ems="10"
+            android:hint="@string/URLeditText"
+            android:inputType="number"
+            app:layout_constraintBottom_toTopOf="@+id/delayValue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+            -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
