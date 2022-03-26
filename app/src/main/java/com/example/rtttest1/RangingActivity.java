@@ -221,10 +221,14 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     public void onClickLogData(View view){
         Snackbar.make(view,"Start sending data",Snackbar.LENGTH_SHORT).show();
+        EditText url_text = findViewById(R.id.editTextServer);
+
+        String url_bit = url_text.getText().toString();
 
         //IP address of Nest Router
-        String url = "http://192.168.86.52:5000/server";
-        //TODO smart url input
+        //String url = "http://192.168.86.52:5000/server";
+        String url = "http://192.168.86." + url_bit + ":5000/server";
+        //TODO editText
 
         final OkHttpClient client = new OkHttpClient();
 
@@ -582,7 +586,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG, "onStop() RangingActivity");
         super.onStop();
         unregisterSensors();
-        //unregisterReceiver(myWifiReceiver);
+        unregisterReceiver(myWifiScanReceiver);
         Running = false;
     }
 
@@ -590,7 +594,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Log.d(TAG,"onResume() RangingActivity");
         super.onResume();
         registerSensors();
-        //registerReceiver(myWifiReceiver);
+        registerReceiver(myWifiScanReceiver,
+                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         Running = true;
     }
 }

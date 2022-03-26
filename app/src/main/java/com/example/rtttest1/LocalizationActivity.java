@@ -559,7 +559,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         Log.d(TAG, "onStop() LocalizationActivity");
         super.onStop();
         unregisterSensors();
-
+        unregisterReceiver(myWifiScanReceiver);
         Running = false;
     }
 
@@ -567,6 +567,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         Log.d(TAG,"onResume() LocalizationActivity");
         super.onResume();
         registerSensors();
+        registerReceiver(myWifiScanReceiver,
+                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         Running = true;
     }
 }

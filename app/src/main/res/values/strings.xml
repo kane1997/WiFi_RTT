@@ -38,6 +38,7 @@
     <string name="GyroscopeX">GyroscopeX: %1$f</string>
     <string name="GyroscopeY">Y: %1$f</string>
     <string name="GyroscopeZ">Z: %1$f</string>
+    <string name="ServerURLbit">Please enter URL</string>
 
     <!-- LocalizationActivity -->
     <string name="ActivityLocalizationLabel">Localization based on floor plan</string>
