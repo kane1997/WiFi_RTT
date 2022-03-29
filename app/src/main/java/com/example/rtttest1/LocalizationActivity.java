@@ -315,7 +315,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     }
 
     private void startLoggingData(){
-        String url = "http://192.168.86.52:5000/server";
+        String url = "http://192.168.86.57:5000/server";
         final OkHttpClient client = new OkHttpClient();
 
         Handler LogRTT_Handler = new Handler();
@@ -348,7 +348,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     call.enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            Log.i("onFailure",e.getMessage());
+                            //Log.i("onFailure",e.getMessage());
                         }
 
                         @Override
@@ -397,7 +397,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     call.enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            Log.i("onFailure",e.getMessage());
+                            //Log.i("onFailure",e.getMessage());
                         }
 
                         @Override
@@ -424,14 +424,15 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             @Override
             public void run() {
                 if (Running) {
-                    BackgroundScan_Handler.postDelayed(this,3000);
+                    Log.d(TAG,"Scanning...");
+                    BackgroundScan_Handler.postDelayed(this,5000);
                     myWifiManager.startScan();
                 } else {
                     BackgroundScan_Handler.removeCallbacks(this);
                 }
             }
         };
-        BackgroundScan_Handler.postDelayed(BackgroundScan_Runnable,1000);
+        BackgroundScan_Handler.postDelayed(BackgroundScan_Runnable,2000);
     }
 
     private void registerSensors(){
@@ -509,13 +510,14 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             for (ScanResult scanResult:myWifiManager.getScanResults()){
                 if (scanResult.is80211mcResponder()) {
                     if (!APs_MacAddress.contains(scanResult.BSSID)) {
+                        APs_MacAddress.add(scanResult.BSSID);
                         RTT_APs.add(scanResult);
-                        Log.d(TAG,"APs_MacAddress: "+APs_MacAddress);
-                        Log.d(TAG, "RTT_APs: "+RTT_APs);
                         //TODO Handler getmaxpeer
                     }
                 }
             }
+            //Log.d(TAG,"APs_MacAddress"+"("+APs_MacAddress.size()+")"+": "+APs_MacAddress);
+            Log.d(TAG, "RTT_APs"+"("+RTT_APs.size()+")"+": "+RTT_APs);
         }
     }
 
