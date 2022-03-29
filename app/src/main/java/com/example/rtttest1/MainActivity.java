@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
             List<ScanResult> scanResults = myWifiManager.getScanResults();
             AP_list_support_RTT = (ArrayList<ScanResult>) findRTTAPs(scanResults);
-            Log.d(TAG, "All WiFi points: " + scanResults);
-            Log.d(TAG, "RTT APs: " + AP_list_support_RTT);
+            Log.d(TAG, "All WiFi points"+"("+scanResults.size()+")"+": "+scanResults);
+            Log.d(TAG, "RTT APs"+"("+AP_list_support_RTT.size()+")"+": "+AP_list_support_RTT);
 
             if (!AP_list_support_RTT.isEmpty()){
                 mainActivityAdapter.swapData(AP_list_support_RTT);
