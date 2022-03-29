@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private boolean LocationPermission = false;
 
+    //AAA
     ArrayList<ScanResult> AP_list_support_RTT;
 
     public WifiManager myWifiManager;
