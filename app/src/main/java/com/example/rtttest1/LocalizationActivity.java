@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -49,6 +50,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private static final String TAG = "LocalizationActivity";
 
     //TODO publuc WifiManager/WifiRTTManager/RTTRangingResultCallback for all activities?
+    //TODO fix layout in all orientations
+    //TODO fix locationX/Y textview
 
     /**
      * For RTT service
@@ -90,6 +93,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     
     private ImageView floor_plan, location_pin, AP1_ImageView,
             AP2_ImageView, AP3_ImageView, AP4_ImageView, AP5_ImageView, AP6_ImageView;
+
+    private TextView LocationX, LocationY;
 
     //int[] floor_plan_location = new int[2];
     //int[] AP_location = new int[2];
@@ -162,6 +167,11 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             AP4_ImageView = findViewById(R.id.imageViewAP4);
             AP5_ImageView = findViewById(R.id.imageViewAP5);
             AP6_ImageView = findViewById(R.id.imageViewAP6);
+
+            LocationX = findViewById(R.id.textViewLocationX);
+            LocationY = findViewById(R.id.textViewLocationY);
+
+
 
             Bitmap bitmap_floor_plan = BitmapFactory.decodeResource(getResources(),
                     R.drawable.floor_plan);
@@ -284,6 +294,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
         Handler Update_Location_Handler = new Handler();
         Runnable Update_Location_Runnable = new Runnable() {
+            @SuppressLint("ResourceType")
             @Override
             public void run() {
                 if (Running) {
@@ -291,6 +302,11 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     Log.d(TAG, Arrays.toString(Calculated_coordinates));
 
                     if (Calculated_coordinates[0] != null && Calculated_coordinates[1] != null) {
+
+                        LocationX.setText(String.format("%.2f",Double.valueOf(Calculated_coordinates[0])));
+                        //LocationX.setText(Calculated_coordinates[0]);
+                        LocationY.setText(String.format("%.2f",Double.valueOf(Calculated_coordinates[1])));
+                        //LocationY.setText(Calculated_coordinates[1]);
                         location_pin.setX((float) (Float.parseFloat
                                 (Calculated_coordinates[1]) *meter2pixel+screen_offsetX));
                         location_pin.setY((float) (Float.parseFloat

@@ -8,7 +8,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.5927083333333333" />
         <entry key="app/src/main/res/drawable/location_pin.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout-land/activity_localization_test.xml" value="0.4671875" />
-        <entry key="app/src/main/res/layout/activity_localization.xml" value="0.19635416666666666" />
+        <entry key="app/src/main/res/layout/activity_localization.xml" value="0.27307692307692305" />
         <entry key="app/src/main/res/layout/activity_localization_test.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2903225806451613" />
         <entry key="app/src/main/res/layout/activity_ranging.xml" value="0.32653061224489793" />
