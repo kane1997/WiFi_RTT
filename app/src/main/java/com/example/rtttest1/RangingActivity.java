@@ -274,7 +274,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     Log.d(TAG, String.valueOf(orientationAngles[0]));
                     RequestBody IMU_Body = new FormBody.Builder()
                             .add("Flag", "IMU")
-                            .add("Timestamp", String.valueOf(IMU_timestamp))
+                            .add("Timestamp", String.valueOf(SystemClock.elapsedRealtimeNanos()))
                             .add("Accx", String.valueOf(accx))
                             .add("Accy", String.valueOf(accy))
                             .add("Accz", String.valueOf(accz))
