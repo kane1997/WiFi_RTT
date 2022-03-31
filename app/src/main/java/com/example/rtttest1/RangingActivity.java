@@ -327,7 +327,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         IMU_timestamp = SystemClock.elapsedRealtime();
         switch (sensorEvent.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                Log.d(TAG,"Acc: "+sensorEvent.timestamp);
+                //Log.d(TAG,"Acc: "+sensorEvent.timestamp);
                 System.arraycopy(sensorEvent.values,0,LastAccReading,0,sensorEvent.values.length);
                 accx = sensorEvent.values[0];
                 accy = sensorEvent.values[1];
@@ -343,7 +343,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
-                Log.d(TAG,"Mag: "+sensorEvent.timestamp);
+                //Log.d(TAG,"Mag: "+sensorEvent.timestamp);
                 System.arraycopy(sensorEvent.values,0,LastMagReading,0,sensorEvent.values.length);
                 magx = sensorEvent.values[0];
                 magy = sensorEvent.values[1];
@@ -359,7 +359,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
-                Log.d(TAG,"Gyro: "+sensorEvent.timestamp);
+                //Log.d(TAG,"Gyro: "+sensorEvent.timestamp);
                 gyrox = sensorEvent.values[0];
                 gyroy = sensorEvent.values[1];
                 gyroz = sensorEvent.values[2];
