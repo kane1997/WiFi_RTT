@@ -201,6 +201,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     public void onClickLogData(View view){
         Log.d(TAG,"onClickLogData()");
+        Snackbar.make(view,"Start logging data",Snackbar.LENGTH_SHORT).show();
 
         EditText url_text = findViewById(R.id.editTextURL);
         //TODO editText optimization
@@ -452,5 +453,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         unregisterSensors();
         unregisterReceiver(myWifiReceiver);
         Running = false;
+        //TODO stop logging when activity stops
     }
 }
