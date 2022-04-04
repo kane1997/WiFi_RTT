@@ -101,18 +101,19 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     //int[] pin_location = new int[2];
     double meter2pixel = 32.5; // 1 meter <--> 32.5 pixels for THIS PARTICULAR FLOOR PLAN!
     double bitmap2floorplan = 2.994;
-    double screen_offsetX = 241; //in pixels
+    //double screen_offsetX = 241; //in pixels
+    double screen_offsetX = 201;
     //int testing_i, testing_j, path_y;
 
     private String RTT_response;
     private String[] Calculated_coordinates = new String[2];
 
-    private final AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",40.91,13.15);
-    private final AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",34.86,11.45);
-    private final AccessPoints AP3 = new AccessPoints("b0:e4:d5:01:26:f5",48.12,11.45);
-    private final AccessPoints AP4 = new AccessPoints("b0:e4:d5:5f:f2:ad",28.92,12.91);
-    private final AccessPoints AP5 = new AccessPoints("b0:e4:d5:96:3b:95",22.04,13.80);
-    private final AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",18.94,11.45);
+    private final AccessPoints AP1 = new AccessPoints("b0:e4:d5:39:26:89",47.508,14.81);
+    private final AccessPoints AP2 = new AccessPoints("cc:f4:11:8b:29:4d",33.190,5.773);
+    private final AccessPoints AP3 = new AccessPoints("b0:e4:d5:01:26:f5",48.931,5.684);
+    private final AccessPoints AP4 = new AccessPoints("b0:e4:d5:5f:f2:ad",29.964,14.281);
+    private final AccessPoints AP5 = new AccessPoints("b0:e4:d5:96:3b:95",21.657,15.631);
+    private final AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",15.786,6.282);
 
     //flag for leaving the activity
     private Boolean Running = false;
