@@ -101,8 +101,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     //int[] pin_location = new int[2];
     double meter2pixel = 32.5; // 1 meter <--> 32.5 pixels for THIS PARTICULAR FLOOR PLAN!
     double bitmap2floorplan = 2.994;
-    //double screen_offsetX = 241; //in pixels
-    double screen_offsetX = 201;
+    double screen_offsetX = 241; //in pixels
+    //double screen_offsetX = 201;
     //int testing_i, testing_j, path_y;
 
     private String RTT_response;
