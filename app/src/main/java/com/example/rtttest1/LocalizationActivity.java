@@ -96,10 +96,10 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
     private TextView LocationX, LocationY;
 
-    //int[] floor_plan_location = new int[2];
-    //int[] AP_location = new int[2];
-    //int[] pin_location = new int[2];
-    double meter2pixel = 32.5; // 1 meter <--> 32.5 pixels for THIS PARTICULAR FLOOR PLAN!
+    int[] floor_plan_location = new int[2];
+    int[] AP_location = new int[2];
+    int[] pin_location = new int[2];
+    double meter2pixel = 32.53275; // 1 meter <--> 32.53275 pixels for THIS PARTICULAR FLOOR PLAN!
     double bitmap2floorplan = 2.994;
     double screen_offsetX = 241; //in pixels
     //double screen_offsetX = 201;
@@ -216,13 +216,13 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
 
               //floor_plan.getLayoutParams();
               Log.i(TAG, "Floorplan" + floor_plan_location[0] + ", " + floor_plan_location[1]);
-              Log.i(TAG, "Pin" + pin_location[0] + ", " + pin_location[1]);
-              Log.i(TAG, "AP6" + AP_location[0] + ", " + AP_location[1]);
+              Log.i(TAG, "Pin " + pin_location[0] + ", " + pin_location[1]);
+              Log.i(TAG, "AP6 " + AP_location[0] + ", " + AP_location[1]);
               Log.i(TAG, "Image Width: " + floor_plan.getWidth());
               Log.i(TAG, "Image Height: " + floor_plan.getHeight());
           }
       }
-     */
+    */
 
     /** To calculate coordinates
      * top left corner of the screen (55,145), top left corner of the floor plan (241,145)
@@ -231,29 +231,37 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
      * width of bitmap (1788), height of bitmap (6438)
      *
      * FOR PIN LOCATION:
-     * setX = y*<meter2pixel>(32.533)+<screen_offsetX>(241), setY = x*<meter2pixel>(32.533)
+     * setX = y*<meter2pixel>(32.533)+<screen_offsetX>(241) * 591/650, setY = x*<meter2pixel>(32.533)
      *
      * FOR PATH EFFECT:
      * path.moveTo/lineTo( (y*32.533*bitmap2floorplan / Pin_y*bitmap2floorplan), ((x*32.533+26)*bitmap2floorplan) )
      */
 
+    private float convert2coordinatesX(double Y){
+        return (float) (Y*meter2pixel+screen_offsetX)*591/650;
+    }
+
+    private float convert2coordinatesY(double X){
+        return (float) (X*meter2pixel)*2151/2341;
+    }
+
     private void setup_pin_location(){
-        AP1_ImageView.setX((float) (AP1.getY()*meter2pixel+screen_offsetX));
-        AP1_ImageView.setY((float) (AP1.getX()*meter2pixel));
-        AP2_ImageView.setX((float) (AP2.getY()*meter2pixel+screen_offsetX));
-        AP2_ImageView.setY((float) (AP2.getX()*meter2pixel));
-        AP3_ImageView.setX((float) (AP3.getY()*meter2pixel+screen_offsetX));
-        AP3_ImageView.setY((float) (AP3.getX()*meter2pixel));
-        AP4_ImageView.setX((float) (AP4.getY()*meter2pixel+screen_offsetX));
-        AP4_ImageView.setY((float) (AP4.getX()*meter2pixel));
-        AP5_ImageView.setX((float) (AP5.getY()*meter2pixel+screen_offsetX));
-        AP5_ImageView.setY((float) (AP5.getX()*meter2pixel));
-        AP6_ImageView.setX((float) (AP6.getY()*meter2pixel+screen_offsetX));
-        AP6_ImageView.setY((float) (AP6.getX()*meter2pixel));
+        AP1_ImageView.setX(convert2coordinatesX(AP1.getY()));
+        AP1_ImageView.setY(convert2coordinatesY(AP1.getX()));
+        AP2_ImageView.setX(convert2coordinatesX(AP2.getY()));
+        AP2_ImageView.setY(convert2coordinatesY(AP2.getX()));
+        AP3_ImageView.setX(convert2coordinatesX(AP3.getY()));
+        AP3_ImageView.setY(convert2coordinatesY(AP3.getX()));
+        AP4_ImageView.setX(convert2coordinatesX(AP4.getY()));
+        AP4_ImageView.setY(convert2coordinatesY(AP4.getX()));
+        AP5_ImageView.setX(convert2coordinatesX(AP5.getY()));
+        AP5_ImageView.setY(convert2coordinatesY(AP5.getX()));
+        AP6_ImageView.setX(convert2coordinatesX(AP6.getY()));
+        AP6_ImageView.setY(convert2coordinatesY(AP6.getX()));
 
         //my desk
-        location_pin.setX((float) (392+screen_offsetX));
-        location_pin.setY(570);
+        location_pin.setX(convert2coordinatesX(1364/meter2pixel));
+        location_pin.setY(convert2coordinatesY(489/meter2pixel));
     }
 
     //TODO animated drawable?
@@ -308,10 +316,8 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                         //LocationX.setText(Calculated_coordinates[0]);
                         LocationY.setText(String.format("%.2f",Double.valueOf(Calculated_coordinates[1])));
                         //LocationY.setText(Calculated_coordinates[1]);
-                        location_pin.setX((float) (Float.parseFloat
-                                (Calculated_coordinates[1]) *meter2pixel+screen_offsetX));
-                        location_pin.setY((float) (Float.parseFloat
-                                (Calculated_coordinates[0])*meter2pixel));
+                        location_pin.setX(convert2coordinatesX(Double.parseDouble(Calculated_coordinates[1])));
+                        location_pin.setY(convert2coordinatesY(Double.parseDouble(Calculated_coordinates[0])));
                     }
                 } else {
                     Update_Location_Handler.removeCallbacks(this);
@@ -340,7 +346,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             @Override
             public void run() {
                 if (Running){
-                    LogRTT_Handler.postDelayed(this,200);
+                    LogRTT_Handler.postDelayed(this,1000);
 
                     List<String> RangingInfo = new ArrayList<>();
                     for (RangingResult result:Ranging_Results){
@@ -382,6 +388,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             }
         };
 
+        /*
         Handler LogIMU_Handler = new Handler();
         Runnable LogIMU_Runnable = new Runnable() {
             @Override
@@ -430,8 +437,10 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 }
             }
         };
+
+         */
         //wait x ms (only once) before running
-        LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
+        //LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 
