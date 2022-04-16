@@ -82,7 +82,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private final float[] LastAccReading = new float[3];
     private final float[] LastMagReading = new float[3];
     private final float[] LastGyroReading = new float[3];
-
     /**
      * For Localization service
      */
