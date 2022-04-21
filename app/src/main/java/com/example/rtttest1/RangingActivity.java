@@ -69,10 +69,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     //IMU
     private SensorManager sensorManager;
-
     private final HashMap<String,Sensor> sensors = new HashMap<>();
-
-    public long IMU_timestamp;
 
     private final float[] rotationMatrix = new float[9];
     private final float[] inclinationMatrix = new float[9];
@@ -80,11 +77,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private final float[] LastAccReading = new float[3];
     private final float[] LastMagReading = new float[3];
     private final float[] LastGyroReading = new float[3];
-
-    int Acc_Flag, Mag_Flag, Gyro_Flag = 0;
-
-    long Acc_reference_time, Mag_reference_time, Gyro_reference_time,
-            Acc_current_time, Mag_current_time, Gyro_current_time;
 
     private Boolean Running = true;
 
@@ -225,9 +217,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
         EditText url_text = findViewById(R.id.editTextServer);
         String url_bit = url_text.getText().toString();
-
-        //IP address of Nest Router
-        //String url = "http://192.168.86.52:5000/server";
         String url = "http://192.168.86." + url_bit + ":5000/server";
         //TODO editText
 
@@ -343,16 +332,13 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 }
                 RequestBody IMU_Body = new FormBody.Builder()
                         .add("Flag","IMU")
-                        .add("Timestamp", String.valueOf(IMU_timestamp))
+                        .add("Timestamp", String.valueOf(SystemClock.elapsedRealtime()))
                         .add("Accx", String.valueOf(LastAccReading[0]))
                         .add("Accy", String.valueOf(LastAccReading[1]))
                         .add("Accz", String.valueOf(LastAccReading[2]))
                         .add("Gyrox", String.valueOf(LastGyroReading[0]))
                         .add("Gyroy", String.valueOf(LastGyroReading[1]))
                         .add("Gyroz", String.valueOf(LastGyroReading[2]))
-                        .add("Magx", String.valueOf(LastMagReading[0]))
-                        .add("Magy", String.valueOf(LastMagReading[1]))
-                        .add("Magz", String.valueOf(LastMagReading[2]))
                         .add("Azimuth",String.valueOf(orientationAngles[0]))
                         .add("Pitch",String.valueOf(orientationAngles[1]))
                         .add("Roll",String.valueOf(orientationAngles[2]))
@@ -368,6 +354,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Log.i("onFailure",e.getMessage());
+                        Snackbar.make(view,"Failed to send data",Snackbar.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -437,18 +424,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         final float alpha = 0.97f;
-        IMU_timestamp = SystemClock.elapsedRealtimeNanos();
 
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
-                if (Acc_Flag == 0) {
-                    Acc_Flag += 1;
-                    //Acc_reference_time = sensorEvent.timestamp;
-                    Acc_reference_time = SystemClock.elapsedRealtimeNanos();
-                }
-
-                //Acc_current_time = sensorEvent.timestamp - Acc_reference_time;
-                Acc_current_time = SystemClock.elapsedRealtimeNanos() - Acc_reference_time;
                 //Log.d(TAG,"ACC: "+Acc_current_time);
                 LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
@@ -464,13 +442,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
-                if (Mag_Flag == 0) {
-                    Mag_Flag += 1;
-                    //Mag_reference_time = sensorEvent.timestamp;
-                    Mag_reference_time = SystemClock.elapsedRealtimeNanos();
-                }
-                //Mag_current_time = sensorEvent.timestamp - Mag_reference_time;
-                Mag_current_time = SystemClock.elapsedRealtimeNanos() - Mag_reference_time;
                 //Log.d(TAG, "MAG: "+ Mag_current_time);
                 LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
@@ -486,13 +457,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
-                if (Gyro_Flag == 0) {
-                    Gyro_Flag += 1;
-                    //Gyro_reference_time = sensorEvent.timestamp;
-                    Gyro_reference_time = SystemClock.elapsedRealtimeNanos();
-                }
-                //Gyro_current_time = sensorEvent.timestamp - Gyro_reference_time;
-                Gyro_current_time = SystemClock.elapsedRealtimeNanos() - Gyro_reference_time;
                 //Log.d(TAG,"GYRO: "+ Gyro_current_time);
                 LastGyroReading[0] = sensorEvent.values[0];
                 LastGyroReading[1] = sensorEvent.values[1];
@@ -535,40 +499,18 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private class WifiScanReceiver extends BroadcastReceiver {
-        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList){
-            List<ScanResult> new_list = new ArrayList<>();
-            for (ScanResult scanResult:OriginalList){
-                if (scanResult.is80211mcResponder()){
-                    new_list.add(scanResult);
-                }
-            }
-            return new_list;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Snackbar.make(findViewById(R.id.btnBackgroundScan),
-                    "APs Updated",Snackbar.LENGTH_SHORT).show();
-            List<ScanResult> scanResults = myWifiManager.getScanResults();
-            RTT_APs = findRTTAPs(scanResults);
-            Log.d(TAG,"Received and updated AP list(" + RTT_APs.size() + "): " + RTT_APs);
-        }
-        /*
         @Override
         public void onReceive(Context context, Intent intent) {
             for (ScanResult scanResult:myWifiManager.getScanResults()){
-                if (scanResult.is80211mcResponder()) {
-                    if (!APs_MacAddress.contains(scanResult.BSSID)) {
-                        RTT_APs.add(scanResult);
-                        Log.d(TAG,"APs_MacAddress: "+APs_MacAddress);
-                        Log.d(TAG, "RTT_APs: "+RTT_APs);
-                        //TODO Handler getmaxpeers
-                    }
+                if (scanResult.is80211mcResponder() && !APs_MacAddress.contains(scanResult.BSSID)) {
+                    RTT_APs.add(scanResult);
+                    APs_MacAddress.add((scanResult.BSSID));
                 }
             }
-            Log.d(TAG,"New AP list(" + RTT_APs.size() + "): " + RTT_APs);
+            Log.d(TAG,"APs_MacAddress"+"("+APs_MacAddress.size()+")"+": "+APs_MacAddress);
+            Log.d(TAG, "RTT_APs"+"("+RTT_APs.size()+")"+": "+RTT_APs);
         }
-         */
+
     }
 
     private class RTTRangingResultCallback extends RangingResultCallback {
@@ -589,15 +531,17 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         @SuppressLint("WrongConstant")
         @Override
         public void onRangingResults(@NonNull List<RangingResult> list) {
-            Ranging_Results.clear();
+            List<RangingResult> temp_result = new ArrayList<>();
             for (RangingResult result:list) {
                 if (result.getStatus() == 0){
-                    Ranging_Results.add(result);
+                    temp_result.add(result);
                 }
             }
             if (Running) {
-                Log.d(TAG, Ranging_Results.size()+String.valueOf(Ranging_Results));
-                rangingActivityAdapter.swapData(Ranging_Results);
+                if (!temp_result.isEmpty()){
+                    rangingActivityAdapter.swapData(temp_result);
+                }
+                //Log.d(TAG, Ranging_Results.size()+String.valueOf(Ranging_Results));
                 queueNextRangingRequest();
             }
         }
