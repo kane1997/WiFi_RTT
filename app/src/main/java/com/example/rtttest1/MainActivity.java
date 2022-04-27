@@ -1,5 +1,4 @@
 package com.example.rtttest1;
-
 import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -8,29 +7,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.rtt.RangingRequest;
 import android.os.Bundle;
-
 import com.google.android.material.snackbar.Snackbar;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
-
 import android.util.Log;
 import android.view.View;
-
 import android.content.pm.PackageManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Check RTT availability, scan surrounding APs and display
- */
+//TODO public or private
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -38,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<ScanResult> AP_list_support_RTT;
 
-    public WifiManager myWifiManager;
+    private WifiManager myWifiManager;
     private WifiScanReceiver myWifiReceiver;
     private MainActivityAdapter mainActivityAdapter;
 
@@ -62,13 +54,13 @@ public class MainActivity extends AppCompatActivity {
         myWifiReceiver = new WifiScanReceiver();
     }
 
+    //TODO make this class a common service
     public class WifiScanReceiver extends BroadcastReceiver {
-        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> OriginalList) {
+        private List<ScanResult> findRTTAPs(@NonNull List<ScanResult> WiFiScanResults) {
             List<ScanResult> RTT_APs = new ArrayList<>();
-
-            for (ScanResult scanResult : OriginalList) {
-                if (scanResult.is80211mcResponder()) {
-                    RTT_APs.add(scanResult);
+            for (ScanResult scanresult:WiFiScanResults) {
+                if (scanresult.is80211mcResponder()) {
+                    RTT_APs.add(scanresult);
                 }
             }
             return RTT_APs;
@@ -91,35 +83,15 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG,"No RTT APs available");
             }
         }
-        /*
-        //avoid permission check for each scan
-        @SuppressLint("MissingPermission")
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            for (ScanResult scanResult:myWifiManager.getScanResults()){
-                if (scanResult.is80211mcResponder()){
-                    AP_list_support_RTT.add(scanResult);
-                }
-            }
-
-            if (!AP_list_support_RTT.isEmpty()){
-                mainActivityAdapter.swapData(AP_list_support_RTT);
-            } else{
-                Log.d(TAG,"No RTT APs available");
-            }
-            //TODO Handle getmaxpeers (10)
-        }
-
-         */
+        //TODO maxpeers
     }
 
-    //Scan surrounding WiFi points
     public void onClickScanAPs(View view) {
         if (LocationPermission) {
             Log.d(TAG, "Scanning...");
             myWifiManager.startScan();
 
-            Snackbar.make(view, "Scanning...", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(view, "Scanning...", Snackbar.LENGTH_SHORT).show();
 
         } else {
             // request permission
@@ -127,15 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     LocationPermissionRequest.class);
             startActivity(IntentRequestPermission);
         }
-    }
-
-    //Start ranging in a new screen
-    public void onClickRangingAPs(View view) {
-        Log.d(TAG,"onClickRangingAPs()");
-
-        Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
-        IntentRanging.putParcelableArrayListExtra("SCAN_RESULT", AP_list_support_RTT);
-        startActivity(IntentRanging);
     }
 
     //Check RTT availability of the device
@@ -154,6 +117,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Start ranging in a new screen
+    public void onClickRangingAPs(View view) {
+        Log.d(TAG,"onClickRangingAPs()");
+
+        Intent IntentRanging = new Intent(getApplicationContext(), RangingActivity.class);
+
+        //Pass AP_list_support_RTT to RangingActivity
+        IntentRanging.putParcelableArrayListExtra("SCAN_RESULT", AP_list_support_RTT);
+        startActivity(IntentRanging);
+    }
+
     public void onClickStartPositioning(View view){
         Log.d(TAG,"onClickStartPositioning()");
 
@@ -161,8 +135,6 @@ public class MainActivity extends AppCompatActivity {
         intentPositioning.putParcelableArrayListExtra("SCAN_RESULT",AP_list_support_RTT);
         startActivity(intentPositioning);
     }
-
-    //TODO make this class a common service
 
     @Override
     protected void onStop() {

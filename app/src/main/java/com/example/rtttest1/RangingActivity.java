@@ -323,6 +323,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
         };
 
+        /*
+
         Thread IMU_thread = new Thread(() -> {
             while (Running) {
                 try {
@@ -332,13 +334,16 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 }
                 RequestBody IMU_Body = new FormBody.Builder()
                         .add("Flag","IMU")
-                        .add("Timestamp", String.valueOf(SystemClock.elapsedRealtime()))
+                        .add("Timestamp", String.valueOf(SystemClock.elapsedRealtimeNanos()))
                         .add("Accx", String.valueOf(LastAccReading[0]))
                         .add("Accy", String.valueOf(LastAccReading[1]))
                         .add("Accz", String.valueOf(LastAccReading[2]))
                         .add("Gyrox", String.valueOf(LastGyroReading[0]))
                         .add("Gyroy", String.valueOf(LastGyroReading[1]))
                         .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                        .add("Magx", String.valueOf(LastMagReading[0]))
+                        .add("Magy",String.valueOf(LastMagReading[1]))
+                        .add("Magz",String.valueOf(LastMagReading[2]))
                         .add("Azimuth",String.valueOf(orientationAngles[0]))
                         .add("Pitch",String.valueOf(orientationAngles[1]))
                         .add("Roll",String.valueOf(orientationAngles[2]))
@@ -369,7 +374,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         });
         IMU_thread.start();
 
-        /*
+         */
+
+
         Handler LogIMU_Handler = new Handler();
         Runnable LogIMU_Runnable = new Runnable() {
             @Override
@@ -377,19 +384,22 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 if (!Running){
                     LogIMU_Handler.removeCallbacks(this);
                 } else {
-                    LogIMU_Handler.postDelayed(this,20);
+                    LogIMU_Handler.postDelayed(this,50);
                     RequestBody IMU_Body = new FormBody.Builder()
                             .add("Flag","IMU")
-                            .add("Timestamp",String.valueOf(IMU_timestamp))
-                            .add("accx", String.valueOf(accx))
-                            .add("accy", String.valueOf(accy))
-                            .add("accz", String.valueOf(accz))
-                            .add("gyrox", String.valueOf(gyrox))
-                            .add("gyroy", String.valueOf(gyroy))
-                            .add("gyroz", String.valueOf(gyroz))
-                            .add("magx", String.valueOf(magx))
-                            .add("magy", String.valueOf(magy))
-                            .add("magz", String.valueOf(magz))
+                            .add("Timestamp",String.valueOf(SystemClock.elapsedRealtimeNanos()))
+                            .add("Accx", String.valueOf(LastAccReading[0]))
+                            .add("Accy", String.valueOf(LastAccReading[1]))
+                            .add("Accz", String.valueOf(LastAccReading[2]))
+                            .add("Gyrox", String.valueOf(LastGyroReading[0]))
+                            .add("Gyroy", String.valueOf(LastGyroReading[1]))
+                            .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                            .add("Magx", String.valueOf(LastMagReading[0]))
+                            .add("Magy",String.valueOf(LastMagReading[1]))
+                            .add("Magz",String.valueOf(LastMagReading[2]))
+                            .add("Azimuth",String.valueOf(orientationAngles[0]))
+                            .add("Pitch",String.valueOf(orientationAngles[1]))
+                            .add("Roll",String.valueOf(orientationAngles[2]))
                             .build();
 
                     Request IMU_Request = new Request.Builder()
@@ -406,9 +416,10 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                         }
 
                         @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        public void onResponse(@NonNull Call call, @NonNull Response response)
+                                throws IOException {
+                            Log.i("result",response.body().string());
                             response.close();
-                            Log.i("result",String.valueOf(response.body()));
                         }
                     });
                 }
@@ -417,20 +428,25 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         //wait x ms (only once) before running
 
         LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
-         */
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        final float alpha = 0.97f;
+        //final float alpha = 0.97f;
 
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.d(TAG,"ACC: "+Acc_current_time);
+                LastAccReading[0] = sensorEvent.values[0];
+                LastAccReading[1] = sensorEvent.values[1];
+                LastAccReading[2] = sensorEvent.values[2];
+                /*
                 LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
+
+                 */
                 /*
                 String AccX = this.getString(R.string.AccelerometerX,LastAccReading[0]);
                 String AccY = this.getString(R.string.AccelerometerY,LastAccReading[1]);
@@ -443,9 +459,15 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
             case Sensor.TYPE_MAGNETIC_FIELD:
                 //Log.d(TAG, "MAG: "+ Mag_current_time);
+                LastMagReading[0] = sensorEvent.values[0];
+                LastMagReading[1] = sensorEvent.values[1];
+                LastMagReading[2] = sensorEvent.values[2];
+                /*
                 LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
                 LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
                 LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
+
+                 */
                 /*
                 String MagX = this.getString(R.string.Magnetic_FieldX,LastMagReading[0]);
                 String MagY = this.getString(R.string.Magnetic_FieldY,LastMagReading[1]);
