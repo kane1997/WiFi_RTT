@@ -83,6 +83,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     private final float[] LastAccReading = new float[3];
     private final float[] LastGyroReading = new float[3];
     private final float[] LastMagReading = new float[3];
+
+    private final float[] LastAccReading2 = new float[3];
+    private final float[] LastMagReading2 = new float[3];
     private final float[] rotationMatrix = new float[9];
     private final float[] inclinationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
@@ -330,16 +333,22 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         switch (sensorEvent.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.d(TAG,"Acc: "+sensorEvent.timestamp);
-                LastAccReading[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
-                LastAccReading[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
-                LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
+                LastAccReading[0] = sensorEvent.values[0];
+                LastAccReading[1] = sensorEvent.values[1];
+                LastAccReading[2] = sensorEvent.values[2];
+                LastAccReading2[0] = alpha * LastAccReading[0] + (1-alpha) * sensorEvent.values[0];
+                LastAccReading2[1] = alpha * LastAccReading[1] + (1-alpha) * sensorEvent.values[1];
+                LastAccReading2[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
                 //Log.d(TAG,"Mag: "+sensorEvent.timestamp);
-                LastMagReading[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
-                LastMagReading[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
-                LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
+                LastMagReading[0] = sensorEvent.values[0];
+                LastMagReading[1] = sensorEvent.values[1];
+                LastMagReading[2] = sensorEvent.values[2];
+                LastMagReading2[0] = alpha * LastMagReading[0] + (1-alpha) * sensorEvent.values[0];
+                LastMagReading2[1] = alpha * LastMagReading[1] + (1-alpha) * sensorEvent.values[1];
+                LastMagReading2[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -351,7 +360,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
         // Rotation matrix based on current readings from accelerometer and magnetometer.
         SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix,
-                LastAccReading, LastMagReading);
+                LastAccReading2, LastMagReading2);
+
         // Express the updated rotation matrix as three orientation angles.
         SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
