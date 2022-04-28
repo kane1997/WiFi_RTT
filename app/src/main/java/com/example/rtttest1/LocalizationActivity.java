@@ -310,7 +310,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     Log.d(TAG, Arrays.toString(Calculated_coordinates));
 
                     if (Calculated_coordinates[0] != null && Calculated_coordinates[1] != null) {
-
+                        //TODO try except for wrong format
                         LocationX.setText(String.format("%.2f",Double.valueOf(Calculated_coordinates[0])));
                         //LocationX.setText(Calculated_coordinates[0]);
                         LocationY.setText(String.format("%.2f",Double.valueOf(Calculated_coordinates[1])));
@@ -337,7 +337,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     }
 
     private void startLoggingData(){
-        String url = "http://192.168.86.61:5000/server";
+        String url = "http://192.168.86.25:5000/server";
         final OkHttpClient client = new OkHttpClient();
 
         Handler LogRTT_Handler = new Handler();
