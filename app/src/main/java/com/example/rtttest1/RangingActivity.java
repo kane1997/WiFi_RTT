@@ -199,7 +199,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         Runnable Update_Runnable = new Runnable() {
             @Override
             public void run() {
-                if (!Running){
+                if (!Running || (APs_MacAddress.size()==6)){
                     Update_Handler.removeCallbacks(this);
                 } else{
                     //background scan rate
@@ -210,6 +210,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
             }
         };
         Update_Handler.postDelayed(Update_Runnable,1000);
+        //TODO this handler affects http performance
     }
 
     public void onClickLogData(View view){
@@ -322,9 +323,6 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 }
             }
         };
-
-        /*
-
         Thread IMU_thread = new Thread(() -> {
             while (Running) {
                 try {
@@ -374,9 +372,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         });
         IMU_thread.start();
 
-         */
-
-
+        /*
         Handler LogIMU_Handler = new Handler();
         Runnable LogIMU_Runnable = new Runnable() {
             @Override
@@ -428,6 +424,8 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
         //wait x ms (only once) before running
 
         LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
+
+         */
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 

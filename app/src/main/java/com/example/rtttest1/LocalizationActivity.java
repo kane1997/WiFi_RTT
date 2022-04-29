@@ -448,7 +448,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
         Runnable BackgroundScan_Runnable = new Runnable() {
             @Override
             public void run() {
-                if (Running) {
+                if (Running && (APs_MacAddress.size()<6)) {
                     Log.d(TAG,"Scanning...");
                     BackgroundScan_Handler.postDelayed(this,5000);
                     myWifiManager.startScan();
