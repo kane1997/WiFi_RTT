@@ -26,11 +26,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,7 +119,9 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private final AccessPoints AP6 = new AccessPoints("b0:e4:d5:91:ba:5d",15.786,6.282);
 
     //flag for leaving the activity
-    private Boolean Running = false;
+    private Boolean Running = true;
+
+    int IMU_num = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -387,59 +393,58 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             }
         };
 
-        /*
-        Handler LogIMU_Handler = new Handler();
-        Runnable LogIMU_Runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (Running) {
-                    LogIMU_Handler.postDelayed(this,50);
-                    RequestBody IMU_Body = new FormBody.Builder()
-                            .add("Flag","IMU")
-                            .add("Timestamp", String.valueOf(IMU_timestamp))
-                            .add("Accx", String.valueOf(LastAccReading[0]))
-                            .add("Accy", String.valueOf(LastAccReading[1]))
-                            .add("Accz", String.valueOf(LastAccReading[2]))
-                            .add("Gyrox", String.valueOf(LastGyroReading[0]))
-                            .add("Gyroy", String.valueOf(LastGyroReading[1]))
-                            .add("Gyroz", String.valueOf(LastGyroReading[2]))
-                            .add("Magx", String.valueOf(LastMagReading[0]))
-                            .add("Magy", String.valueOf(LastMagReading[1]))
-                            .add("Magz", String.valueOf(LastMagReading[2]))
-                            .add("Azimuth",String.valueOf(orientationAngles[0]))
-                            .add("Pitch",String.valueOf(orientationAngles[1]))
-                            .add("Roll",String.valueOf(orientationAngles[2]))
-                            .build();
 
-                    Request IMU_Request = new Request.Builder()
-                            .url(url)
-                            .post(IMU_Body)
-                            .build();
-
-                    final Call call = client.newCall(IMU_Request);
-                    call.enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            //Log.i("onFailure",e.getMessage());
-                        }
-
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response)
-                                throws IOException{
-                            //String IMU_response = Objects.requireNonNull(response.body()).string();
-                            response.close();
-                            //Log.i("result",IMU_response);
-                        }
-                    });
-                } else {
-                    LogIMU_Handler.removeCallbacks(this);
+        Thread IMU_thread = new Thread(() -> {
+            Log.d(TAG, String.valueOf(Running));
+            while (Running) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }
-        };
+                IMU_num++;
+                RequestBody IMU_Body = new FormBody.Builder()
+                        .add("Flag","IMU")
+                        .add("Timestamp", String.valueOf(SystemClock.elapsedRealtimeNanos()))
+                        .add("num",String.valueOf(IMU_num))
+                        .add("Accx", String.valueOf(LastAccReading[0]))
+                        .add("Accy", String.valueOf(LastAccReading[1]))
+                        .add("Accz", String.valueOf(LastAccReading[2]))
+                        .add("Gyrox", String.valueOf(LastGyroReading[0]))
+                        .add("Gyroy", String.valueOf(LastGyroReading[1]))
+                        .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                        .add("Magx", String.valueOf(LastMagReading[0]))
+                        .add("Magy",String.valueOf(LastMagReading[1]))
+                        .add("Magz",String.valueOf(LastMagReading[2]))
+                        .add("Azimuth",String.valueOf(orientationAngles[0]))
+                        .add("Pitch",String.valueOf(orientationAngles[1]))
+                        .add("Roll",String.valueOf(orientationAngles[2]))
+                        .build();
 
-         */
+                Request IMU_Request = new Request.Builder()
+                        .url(url)
+                        .post(IMU_Body)
+                        .build();
+
+                final Call call = client.newCall(IMU_Request);
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("onFailure",e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response)
+                            throws IOException {
+                        response.close();
+                        //String result = Objects.requireNonNull(response.body()).string();
+                        //Log.i("result",result);
+                    }
+                });
+            }
+        });
+        IMU_thread.start();
         //wait x ms (only once) before running
-        //LogIMU_Handler.postDelayed(LogIMU_Runnable,1000);
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
 
