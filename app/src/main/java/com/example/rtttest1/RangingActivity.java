@@ -80,6 +80,9 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
 
     private Boolean Running = true;
 
+    private long IMU_timestamp;
+    private long RTT_timestamp;
+
     //Ranging layout
 
     private EditText RangingDelayEditText;
@@ -295,9 +298,21 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     }
 
                     RequestBody RTT_body = new FormBody.Builder()
-                            .add("Flag","RTT")
-                            .add("Timestamp", String.valueOf(SystemClock.elapsedRealtime()))
+                            .add("RTT_Timestamp", String.valueOf(RTT_timestamp))
                             .add("RTT_Result", String.valueOf(RangingInfo))
+                            .add("IMU_Timestamp",String.valueOf(IMU_timestamp))
+                            .add("Accx", String.valueOf(LastAccReading[0]))
+                            .add("Accy", String.valueOf(LastAccReading[1]))
+                            .add("Accz", String.valueOf(LastAccReading[2]))
+                            .add("Gyrox", String.valueOf(LastGyroReading[0]))
+                            .add("Gyroy", String.valueOf(LastGyroReading[1]))
+                            .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                            .add("Magx", String.valueOf(LastMagReading[0]))
+                            .add("Magy",String.valueOf(LastMagReading[1]))
+                            .add("Magz",String.valueOf(LastMagReading[2]))
+                            .add("Azimuth",String.valueOf(orientationAngles[0]))
+                            .add("Pitch",String.valueOf(orientationAngles[1]))
+                            .add("Roll",String.valueOf(orientationAngles[2]))
                             .build();
 
                     Request RTT_request = new Request.Builder()
@@ -370,7 +385,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 });
             }
         });
-        IMU_thread.start();
+        //IMU_thread.start();
 
         /*
         Handler LogIMU_Handler = new Handler();
@@ -432,6 +447,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         //final float alpha = 0.97f;
+        IMU_timestamp = SystemClock.elapsedRealtimeNanos();
 
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
@@ -551,6 +567,7 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                     temp_result.add(result);
                 }
             }
+            RTT_timestamp = SystemClock.elapsedRealtimeNanos();
             if (Running) {
                 if (!temp_result.isEmpty()){
                     rangingActivityAdapter.swapData(temp_result);
