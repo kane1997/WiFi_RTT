@@ -343,7 +343,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     }
 
     private void startLoggingData(){
-        String url = "http://192.168.86.29:5000/server";
+        String url = "http://192.168.86.44:5000/server";
         final OkHttpClient client = new OkHttpClient();
 
         Handler LogRTT_Handler = new Handler();
