@@ -445,14 +445,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 LastAccReading[2] = alpha * LastAccReading[2] + (1-alpha) * sensorEvent.values[2];
 
                  */
-                /*
                 String AccX = this.getString(R.string.AccelerometerX,LastAccReading[0]);
                 String AccY = this.getString(R.string.AccelerometerY,LastAccReading[1]);
                 String AccZ = this.getString(R.string.AccelerometerZ,LastAccReading[2]);
                 textAccx.setText(AccX);
                 textAccy.setText(AccY);
                 textAccz.setText(AccZ);
-                 */
                 break;
 
             case Sensor.TYPE_MAGNETIC_FIELD:
@@ -466,14 +464,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 LastMagReading[2] = alpha * LastMagReading[2] + (1-alpha) * sensorEvent.values[2];
 
                  */
-                /*
                 String MagX = this.getString(R.string.Magnetic_FieldX,LastMagReading[0]);
                 String MagY = this.getString(R.string.Magnetic_FieldY,LastMagReading[1]);
                 String MagZ = this.getString(R.string.Magnetic_FieldZ,LastMagReading[2]);
                 textMagx.setText(MagX);
                 textMagy.setText(MagY);
                 textMagz.setText(MagZ);
-                 */
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -481,14 +477,12 @@ public class RangingActivity extends AppCompatActivity implements SensorEventLis
                 LastGyroReading[0] = sensorEvent.values[0];
                 LastGyroReading[1] = sensorEvent.values[1];
                 LastGyroReading[2] = sensorEvent.values[2];
-                /*
                 String GyroX = this.getString(R.string.GyroscopeX,LastGyroReading[0]);
                 String GyroY = this.getString(R.string.GyroscopeY,LastGyroReading[1]);
                 String GyroZ = this.getString(R.string.GyroscopeZ,LastGyroReading[2]);
                 textGrox.setText(GyroX);
                 textGroy.setText(GyroY);
                 textGroz.setText(GyroZ);
-                 */
         }
 
         // Rotation matrix based on current readings from accelerometer and magnetometer.

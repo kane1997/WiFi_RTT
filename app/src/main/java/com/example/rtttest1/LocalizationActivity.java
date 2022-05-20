@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,6 +80,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     private final HashMap<String, Sensor> sensors = new HashMap<>();
 
     private long IMU_timestamp;
+    private long RTT_timestamp;
 
     private final float[] rotationMatrix = new float[9];
     private final float[] inclinationMatrix = new float[9];
@@ -177,8 +179,6 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             LocationX = findViewById(R.id.textViewLocationX);
             LocationY = findViewById(R.id.textViewLocationY);
 
-
-
             Bitmap bitmap_floor_plan = BitmapFactory.decodeResource(getResources(),
                     R.drawable.floor_plan);
             temp_bitmap = Bitmap.createBitmap(bitmap_floor_plan.getWidth(),
@@ -200,7 +200,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             setup_pin_location();
             registerSensors();
             startRangingRequest();
-            startLoggingData();
+            //startLoggingData();
             ScanInBackground();
             update_location_pin();
         }
@@ -342,8 +342,12 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 rangingRequest, getApplication().getMainExecutor(), myRTTRangingResultCallback);
     }
 
-    private void startLoggingData(){
-        String url = "http://192.168.86.29:5000/server";
+    public void onClickstartLoggingData(View view){
+        Log.d(TAG,"Startlogging");
+        EditText url_text = findViewById(R.id.editText_server);
+        String url_bit = url_text.getText().toString();
+        String url = "http://192.168.86."+url_bit+":5000/server";
+        Log.d(TAG,url);
         final OkHttpClient client = new OkHttpClient();
 
         Handler LogRTT_Handler = new Handler();
@@ -351,8 +355,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             @Override
             public void run() {
                 if (Running){
-                    LogRTT_Handler.postDelayed(this,1000);
-
+                    LogRTT_Handler.postDelayed(this,200);
                     List<String> RangingInfo = new ArrayList<>();
                     for (RangingResult result:Ranging_Results){
                         RangingInfo.add(String.valueOf(result.getMacAddress()));
@@ -362,9 +365,21 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     }
 
                     RequestBody RTT_body = new FormBody.Builder()
-                            .add("Flag","RTT")
-                            .add("Timestamp", String.valueOf(SystemClock.elapsedRealtime()))
+                            .add("RTT_Timestamp", String.valueOf(RTT_timestamp))
                             .add("RTT_Result", String.valueOf(RangingInfo))
+                            .add("IMU_Timestamp",String.valueOf(IMU_timestamp))
+                            .add("Accx", String.valueOf(LastAccReading[0]))
+                            .add("Accy", String.valueOf(LastAccReading[1]))
+                            .add("Accz", String.valueOf(LastAccReading[2]))
+                            .add("Gyrox", String.valueOf(LastGyroReading[0]))
+                            .add("Gyroy", String.valueOf(LastGyroReading[1]))
+                            .add("Gyroz", String.valueOf(LastGyroReading[2]))
+                            .add("Magx", String.valueOf(LastMagReading[0]))
+                            .add("Magy",String.valueOf(LastMagReading[1]))
+                            .add("Magz",String.valueOf(LastMagReading[2]))
+                            .add("Azimuth",String.valueOf(orientationAngles[0]))
+                            .add("Pitch",String.valueOf(orientationAngles[1]))
+                            .add("Roll",String.valueOf(orientationAngles[2]))
                             .build();
 
                     Request RTT_request = new Request.Builder()
@@ -393,12 +408,11 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
             }
         };
 
-
         Thread IMU_thread = new Thread(() -> {
             Log.d(TAG, String.valueOf(Running));
             while (Running) {
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -443,7 +457,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                 });
             }
         });
-        IMU_thread.start();
+        //IMU_thread.start();
         //wait x ms (only once) before running
         LogRTT_Handler.postDelayed(LogRTT_Runnable,1000);
     }
@@ -481,7 +495,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         final float alpha = 0.97f;
-        IMU_timestamp = SystemClock.elapsedRealtime();
+        IMU_timestamp = SystemClock.elapsedRealtimeNanos();
 
         switch (sensorEvent.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
@@ -574,6 +588,7 @@ public class LocalizationActivity extends AppCompatActivity implements SensorEve
                     Ranging_Results.add(result);
                 }
             }
+            RTT_timestamp = SystemClock.elapsedRealtimeNanos();
             if (Running) {
                 queueNextRangingRequest();
             }
